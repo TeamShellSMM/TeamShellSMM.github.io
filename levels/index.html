@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>#TeamShell Levels</title>
+<style> 
+tr td:nth-child(3),th,h1,h2,h3,h4 {font-family: 'Bangers', cursive;}
+th {font-size: 12pt}
+h1 {font-size:64pt;}
+table {width:100%;}
+img {width: 36px}
+#logo {position: absolute;right:0px;background: #FFF}
+.green {color:#01a09e;}
+.orange {color:#f88501;}
+.copy {cursor:pointer;-webkit-transition: color 0.5s; /* Safari prior 6.1 */
+  transition: color 0.5s;}
+#refresh {cursor: pointer;}
+</style>
+
+<link href="https://fonts.googleapis.com/css?family=Bangers&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.js"></script>
+
+
+<script>
+  var data,level_headers,tag_labels,spig_fav,clearers,clears,raw_data;
+  var params=new URLSearchParams(window.location.search)
+
+  function refresh(){
+    data=JSON.parse(raw_data)
+    var level_headers=data.levels.shift()
+    var played_headers=data.played.shift()
+    spig_fav=[]
+    clearers=[]
+    clears={}
+    tag_labels=data.tags
+
+    for(var i=0;i<data.played.length;i++){
+      if(data.played[i][1]=="Space_Pig" && data.played[i][4]=="1"){
+        spig_fav.push(data.played[i][0])
+      }
+      if(clearers.indexOf(data.played[i][1])==-1){
+        clearers.push(data.played[i][1])
+      }
+      if(!clears[data.played[i][0]]) clears[data.played[i][0]]={}
+        clears[data.played[i][0]][data.played[i][1]]={cleared:data.played[i][2],vote:data.played[i][5]}
+    }
+
+
+
+  $('#registeredName').typeahead({source: clearers});
+
+    for(var i=0;i<data.levels.length;i++){
+      data.levels[i].unshift(i+1)
+      var tsclears=0;
+      var votesum=0;
+      var votetotal=0;
+      if(clears[data.levels[i][1]]){
+        for(var j in clears[data.levels[i][1]]){
+          if(clears[data.levels[i][1]][j].cleared){
+            tsclears++;
+          }
+          if(clears[data.levels[i][1]][j].vote){
+            votetotal++;
+            votesum+=Number(clears[data.levels[i][1]][j].vote)
+          }
+
+        }
+      }
+      data.levels[i].push(tsclears) //your vote
+      data.levels[i].push(votetotal>0? ((votesum/votetotal).toFixed(1))+","+votetotal:"0,0") //cleared
+      if(clears[data.levels[i][1]] && clears[data.levels[i][1]][get_input("member")]){
+          data.levels[i].push(clears[data.levels[i][1]][get_input("member")].cleared)
+          data.levels[i].push(clears[data.levels[i][1]][get_input("member")].vote)
+      } else {
+        data.levels[i].push("-")
+        data.levels[i].push("-")  
+      }
+      
+    }
+
+    var datatable=$('#table').DataTable()
+    datatable.clear();
+    datatable.rows.add(data.levels)
+    if(get_input('creator')){
+      datatable.column(2).search('"'+get_input('creator')+'"',false,true)
+    }
+    //
+    if(!get_input('approved') || get_input('approved')=="1"||get_input('approved')=="2"){
+
+      datatable.column(5).search( (get_input('approved')=="2"?'"0"':'"1"'),false,true)  
+    } else {
+      datatable.column(5).search( "",false,true)  
+    }
+
+    if(get_input("cleared")=="2"||get_input("cleared")=="3"){
+      datatable.column(13).search(get_input('cleared')=="3"?'"1"':'"0"',false,true)  
+    }
+    
+    datatable.draw();
+    $('[data-toggle="tooltip"],.copy,#refresh,#submitButton').tooltip()
+    $('.copy').click(function(){
+     var code=$(this).parent().text().substring(0,11);
+     var old_title="Copy tsclear code"
+     var new_title="Code copied."
+     
+     $(this).addClass("text-success")
+      $(this).tooltip('hide')
+          .attr('title', new_title)
+          .attr('data-original-title', new_title)
+          .tooltip('update')
+          .tooltip('show')
+      var temp=this
+     
+     setTimeout(function(){
+      $(temp).removeClass("text-success")
+       $(temp).tooltip('hide')
+          .attr('title', old_title)
+          .attr('data-original-title', old_title)
+          .tooltip('update')
+          .tooltip('enable')
+     },2000)
+    copyClipboard(code)
+  })
+
+  }
+function copyClipboard(str){
+  const el = document.createElement('textarea');
+  el.value = "!tsclear "+str;
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand('copy');
+  document.body.removeChild(el);
+
+}
+
+
+
+
+  function store_input(query_name,obj){
+    if(params.get(query_name)){
+      localStorage.setItem(query_name,params.get(query_name))
+      $(obj).val(params.get(query_name))
+    } else if(localStorage.getItem(query_name)){
+      $(obj).val(localStorage.getItem(query_name))
+    }
+  }
+  
+  function get_input(query_name){
+    return localStorage.getItem(query_name)
+  }
+
+  function setGetParam(key,value) {
+    localStorage.setItem(key,value)
+    if (history.pushState) {
+      var params = new URLSearchParams(window.location.search);
+      params.set(key, value);
+      var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + params.toString();
+      window.history.pushState({path:newUrl},'',newUrl);
+    }
+  }
+
+  $(function(){
+
+    store_input('member','#registeredName')
+    store_input('cleared','#clearedLevel')
+    store_input('approved','#pendingLevel')
+
+/*
+    $("#registeredName").change(function(){
+      setGetParam("member",$(this).val())
+      refresh()
+    }) 
+    $("#clearedLevel").change(function(){
+      setGetParam("cleared",$(this).val())
+      refresh()
+    }) 
+    $("#pendingLevel").change(function(){
+      setGetParam("approved",$(this).val())
+      refresh()
+    }) 
+
+    $("#submitButton").click(function(e){
+      refresh()
+      e.preventDefault()
+      return false;
+    })
+*/
+
+    $("#refresh").click(function(){
+      getData()
+    })
+
+    $('#table').DataTable({
+      "language": {
+      "emptyTable": "Data is loading",
+      "info":           "_TOTAL_ levels",
+      "infoEmpty":      "0 levels",
+      "infoFiltered":   "/ _MAX_ levels",
+      },
+      paging:false,
+      responsive:true,
+      dom : "iti",
+      "columnDefs": [
+           {
+            "render": function ( data, type, row ) {
+                    return "<span class='text-monospace'>"+data+"</span> <span class='copy' title='Copy tsclear code'><i class='fa fa-clipboard' aria-hidden='true'></i></span>"
+                },
+                "orderable": false,
+                targets:1,
+            },
+            {
+                "render": function ( data, type, row ) {
+                  if(type!="display") return data
+
+                  var videos=row[7]?"<a target='_blank' data-toggle='tooltip' title='Video clear' href='"+row[7]+"'><i class='fa fa-video-camera' aria-hidden='true'></i></a>" :""
+                  var tags=row[9]
+                  tags=tags?tags.split(","):[]
+                  if(row[5]=="0"){
+                    tags.unshift("Pending")
+                  }
+                  if(spig_fav.indexOf(row[1])!=-1){
+                    tags.unshift("Spig ❤️")
+                  }
+                  for(var i=0;i<tags.length;i++){
+                    var type=tag_labels[tags[i]]?tag_labels[tags[i]]:"secondary"
+                    tags[i]='<span class="tag badge badge-pill badge-'+type+'">'+tags[i]+"</span>"
+                  }
+                  tags=tags.join("")
+
+                  return "<span class='font-weight-bold'>"+data+"</span><br/>"+videos+" "+tags;
+                },
+                targets:3,
+            },
+            {
+                "render": function ( data, type, row ) {
+                    return Number(data).toFixed(1);
+                },
+                targets:4,
+            },
+            {
+                
+                visible: false,
+                targets:[5,6,7,8,9,10]
+            }, /*
+            {
+                "render": function ( data, type, row ) {
+                    data=data?data:1569790971; //first registered date as placeholder
+                    data=data*1000
+                     if ( type === "sort" || type === 'type' ) {
+                        return data;
+                    } else {
+                        return moment(moment.utc(data)).local().format('ll')   
+                    }
+                    
+                },
+                targets:8
+            },*/ {
+                "render": function ( data, type, row ) {
+                    data=data.split(",")
+                     if ( type !="display" ) {
+                        return data[0];
+                    } else {
+                        return data[0]+"<br/><span class='tag badge badge-secondary'>"+data[1]+" votes</span>";
+                    }
+                    
+                },
+                targets:12
+            },{
+                "render": function ( data, type, row ) {
+                     if ( type !="display" ) {
+                        return data=="1"?"1":"0";
+                    } else {
+                        return (data=="1"?'<i title="Entered player has cleared this level." data-toggle="tooltip" class="fa fa-check text-success" aria-hidden="true"></i>': "");
+                    }
+                    
+                },
+                targets:13
+            },{
+                "render": function ( data, type, row ) {
+                    return isNaN(data)||data==0?"":Number(data).toFixed(1);
+                },
+                targets:14
+            },
+             {
+                defaultContent:"",
+                targets:[6,7,8,9,10,11,12,13,14]
+            },
+            //{ "visible": false,  "targets": [ 3 ] }
+        ]
+    })
+
+
+function getData(){
+    var datatable=$('#table').DataTable()
+    datatable.clear().draw();
+    $.getJSON("https://script.google.com/macros/s/AKfycbwOZQzoqLRYbwSoTYWgJeT1A-YKfDKJf_2jqNBm5qmr_BncNL8/exec?callback=?").done(function(_data){
+    raw_data=JSON.stringify(_data)
+
+    refresh()
+
+  
+  })
+}
+
+getData()
+  })
+</script>
+</head>
+<body>
+<div class="container">
+<h1><img src="buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Levels</h1>
+<h4>Join the discord for more information: <a href="https://discord.gg/7tQJewa">https://discord.gg/7tQJewa</a></h4>
+
+<form>
+  <div class="form-group row">
+    <div class="col-md-5">
+    <label for="registeredName">Registered TeamShell Name</label>
+    <input name="member" type="text" class="form-control" id="registeredName" autocomplete="off" placeholder="Your registered TeamShell Name">
+    <small class="form-text text-muted">This is just to filter out the clears and is optional. Your registered TeamShell name is case sensitive.</small>
+    </div>
+
+<div class="col-md-3">
+  <label for="clearedLevel">Cleared</label>
+  <select name="cleared" id="clearedLevel" class="form-control">
+        <option value="1" selected>All</option>
+        <option value="2">Uncleared Only</option>
+        <option value="3">Cleared Only</option>
+      </select>
+      <small class="form-text text-muted">The clears shown are clears registered to ShellBot 2000 in TeamShell's discord.</small>
+    </div>
+  
+
+  <div class="col-md-3">
+  <label for="pendingLevel">Levels</label>
+  <select name="approved" id="pendingLevel" class="form-control">
+        <option value="1" selected>Approved</option>
+        <option value="2" >Pending</option>
+        <option value="3">All</option>
+      </select>
+      <small class="form-text text-muted">Approved levels are levels that have been played and approved by a Shellder.</small>
+    </div>
+  
+
+    <div class="col-md-1"><label for="submitButton">&nbsp;</label><button type="submit" id="submitButton" class="btn btn-block btn-primary">Filter</button></div>
+  </div>
+
+
+  
+</form>
+<div class="btn btn-block btn-info"><div id="refresh" title='Get new data from the sheet. Useful if you just submitted a clear'>Refresh Data <i class="fa fa-refresh" aria-hidden="true"></i></div></div>
+
+<table id="table" class="compact row-border stripe hover">
+  <thead><tr>
+    <th style="width:10px;">No.</th>
+    <th style="width:10em;">Level Code</th>
+    <th style="width:10em">Creator</th>
+    <th>Level Name</th>
+    <th style="width:10px">Difficulty</th>
+    <th>Approved</th>
+    <th style="width:10px">New Code</th>
+    <th style="width:10px">Video</th>
+    <th style="width:5em">Registered On</th>
+    <th style="width:5em">Tags</th>
+    <th style="width:5em">Code</th>
+    <th style="width:10px">Clears</th>    
+    <th style="width:10px">TS Vote</th>    
+    <th style="width:10px">Cleared</th>    
+    <th style="width:10px">Your Vote</th>    
+  </tr></thead>
+</table>
+
+</div>
+</body>
+</html>
