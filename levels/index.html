@@ -19,7 +19,7 @@
 
 <style> 
 
-tr td:nth-child(3),th,h1,h2,h3,h4 {font-family: 'Bangers', cursive;}
+tr td:nth-child(3),th,h1,h2,h3,h4 {font-family: 'Bangers', sans-serif;}
 th {font-size: 12pt}
 h1 {font-size:64pt;}
 table {width:100%;}
@@ -35,7 +35,7 @@ html.dark body {background:#121212;color:#FFF;}
 
 html.dark table.dataTable.stripe tbody tr.odd,
 html.dark table.dataTable.display tbody tr.odd {
-  background-color: #333;
+  background-color: #222;
 }
 html.dark table.dataTable tbody tr {
 background-color: #111;
@@ -286,7 +286,15 @@ function copyClipboard(str){
                 "render": function ( data, type, row ) {
                   if(type!="display") return data
 
-                  var videos=row[7]?"<a target='_blank' data-toggle='tooltip' title='Video clear' href='"+row[7]+"'><i class='fa fa-video-camera' aria-hidden='true'></i></a>" :""
+                  var videos="";
+
+                  if(row[7]){
+                    var raw_vids=row[7].split(",")
+                    for(var j=0;j<raw_vids.length;j++){
+                      videos+="<a target='_blank' data-toggle='tooltip' title='Video clear' href='"+raw_vids[j]+"'><i class='fa fa-video-camera' aria-hidden='true'></i></a> "
+                    }
+                  } 
+                  //row[7]?"<a target='_blank' data-toggle='tooltip' title='Video clear' href='"+row[7]+"'><i class='fa fa-video-camera' aria-hidden='true'></i></a>" :""
                   var tags=row[9]
                   tags=tags?tags.split(","):[]
                   if(row[5]=="0"){
