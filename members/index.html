@@ -285,6 +285,8 @@ function copyClipboard(str){
       $(obj).val(params.get(query_name))
     } else if(localStorage.getItem(query_name)){
       $(obj).val(localStorage.getItem(query_name))
+    } else {
+      localStorage.setItem(query_name,$(obj).val())
     }
   }
   
