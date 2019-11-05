@@ -68,6 +68,7 @@ html.dark .dataTables_wrapper .dataTables_paginate {
 
   var data,level_headers,tag_labels,spig_fav,clearers,clears,raw_data;
   var params=new URLSearchParams(window.location.search)
+  var tags_list;
 
 
   function setDark(val){
@@ -100,6 +101,8 @@ html.dark .dataTables_wrapper .dataTables_paginate {
     clearers=[]
     clears={}
     tag_labels=data.tags
+    tags_list=[];
+    var current_tag=params.get("tag")
 
     for(var i=0;i<data.played.length;i++){
       if(data.played[i][1]=="Space_Pig" && data.played[i][4]=="1"){
@@ -116,6 +119,7 @@ html.dark .dataTables_wrapper .dataTables_paginate {
 
   $('#registeredName').typeahead({source: clearers});
 
+    var filtered_levels=[];
     for(var i=0;i<data.levels.length;i++){
       data.levels[i].unshift(i+1)
       var tsclears=0;
@@ -123,7 +127,7 @@ html.dark .dataTables_wrapper .dataTables_paginate {
       var votetotal=0;
       if(clears[data.levels[i][1]]){
         for(var j in clears[data.levels[i][1]]){
-          if(clears[data.levels[i][1]][j].cleared){
+          if(clears[data.levels[i][1]][j].cleared=="1" && j!=data.levels[i][2]){
             tsclears++;
           }
           if(clears[data.levels[i][1]][j].vote){
@@ -142,12 +146,50 @@ html.dark .dataTables_wrapper .dataTables_paginate {
         data.levels[i].push("-")
         data.levels[i].push("-")  
       }
+      var curr_tags=data.levels[i][9].split(",")
+
+      if(data.levels[i][5]=="0"){
+        curr_tags.unshift("Pending")
+      }
+      if(spig_fav.indexOf(data.levels[i][1])!=-1){
+        curr_tags.unshift("Spig ♥")
+      }
+      data.levels[i][9]=curr_tags.join(",")
+
+      var include=true;
+      for(var k=0;k<curr_tags.length;k++){
+        if(curr_tags[k] && tags_list.indexOf(curr_tags[k])=="-1")
+          tags_list.push(curr_tags[k])
+      }
+
+      if(current_tag){
+        if(curr_tags.indexOf(current_tag)=="-1"){
+          include=false
+        }
+      } else { //default view
+        for(var k=0;k<curr_tags.length;k++){
+          if(data.seperate.indexOf(curr_tags[k])!="-1"){
+            include=false
+          }
+        }
+      }
+
+
+      if(include){
+        filtered_levels.push(data.levels[i])  
+      }
+
       
     }
 
+    var tempSelect="<option value=''>Default</option>"
+    for(var k=0;k<tags_list.length;k++){
+      tempSelect+="<option "+ (current_tag==tags_list[k]?"selected":"")+">"+tags_list[k]+"</option>"
+    }
+    $("#tagSelect").html(tempSelect)
     var datatable=$('#table').DataTable()
     datatable.clear();
-    datatable.rows.add(data.levels)
+    datatable.rows.add(filtered_levels)
     if(get_input('creator')){
       datatable.column(2).search('"'+get_input('creator')+'"',false,true)
     }
@@ -297,15 +339,9 @@ function copyClipboard(str){
                   //row[7]?"<a target='_blank' data-toggle='tooltip' title='Video clear' href='"+row[7]+"'><i class='fa fa-video-camera' aria-hidden='true'></i></a>" :""
                   var tags=row[9]
                   tags=tags?tags.split(","):[]
-                  if(row[5]=="0"){
-                    tags.unshift("Pending")
-                  }
-                  if(spig_fav.indexOf(row[1])!=-1){
-                    tags.unshift("Spig ❤️")
-                  }
                   for(var i=0;i<tags.length;i++){
                     var type=tag_labels[tags[i]]?tag_labels[tags[i]]:"secondary"
-                    tags[i]='<span class="tag badge badge-pill badge-'+type+'">'+tags[i]+"</span>"
+                    tags[i]='<a href="?tag='+tags[i]+'"><span class="tag badge badge-pill badge-'+type+'">'+tags[i]+"</span></a>"
                   }
                   tags=tags.join("")
 
@@ -398,13 +434,13 @@ getData()
 </div>
 <form>
   <div class="form-group row">
-    <div class="col-md-5">
+    <div class="col-md-3">
     <label for="registeredName">Registered TeamShell Name</label>
     <input name="member" type="text" class="form-control" id="registeredName" autocomplete="off" placeholder="Your registered TeamShell Name">
     <small class="form-text text-muted">This is just to filter out the clears and is optional. Your registered TeamShell name is case sensitive.</small>
     </div>
 
-<div class="col-md-3">
+<div class="col-md-2">
   <label for="clearedLevel">Cleared</label>
   <select name="cleared" id="clearedLevel" class="form-control">
         <option value="1" selected>All</option>
@@ -415,7 +451,7 @@ getData()
     </div>
   
 
-  <div class="col-md-3">
+  <div class="col-md-2">
   <label for="pendingLevel">Levels</label>
   <select name="approved" id="pendingLevel" class="form-control">
         <option value="1" selected>Approved</option>
@@ -423,6 +459,12 @@ getData()
         <option value="3">All</option>
       </select>
       <small class="form-text text-muted">Approved levels are levels that have been played and approved by a Shellder.</small>
+    </div>
+
+  <div class="col-md-4">
+  <label for="pendingLevel">Tags <span class="tag badge badge-pill badge-success">New</span></label>
+  <select name="tag" id="tagSelect" class="form-control"></select>
+      <small class="form-text text-muted">Default view will show all TeamShell Levels.</small>
     </div>
   
 
