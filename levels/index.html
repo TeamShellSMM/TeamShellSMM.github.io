@@ -112,7 +112,7 @@ html.dark .dataTables_wrapper .dataTables_paginate {
         clearers.push(data.played[i][1])
       }
       if(!clears[data.played[i][0]]) clears[data.played[i][0]]={}
-        clears[data.played[i][0]][data.played[i][1]]={cleared:data.played[i][2],vote:data.played[i][5]}
+        clears[data.played[i][0]][data.played[i][1]]={cleared:data.played[i][2],vote:data.played[i][5],liked:data.played[i][4]=="1"}
     }
 
 
@@ -125,6 +125,7 @@ html.dark .dataTables_wrapper .dataTables_paginate {
       var tsclears=0;
       var votesum=0;
       var votetotal=0;
+      var likes=0;
       if(clears[data.levels[i][1]]){
         for(var j in clears[data.levels[i][1]]){
           if(clears[data.levels[i][1]][j].cleared=="1" && j!=data.levels[i][2]){
@@ -134,17 +135,23 @@ html.dark .dataTables_wrapper .dataTables_paginate {
             votetotal++;
             votesum+=Number(clears[data.levels[i][1]][j].vote)
           }
+          if(clears[data.levels[i][1]][j].liked){
+            likes++;
+          }
 
         }
       }
       data.levels[i].push(tsclears) //your vote
       data.levels[i].push(votetotal>0? ((votesum/votetotal).toFixed(1))+","+votetotal:"0,0") //cleared
+      data.levels[i].push(likes) //liked
       if(clears[data.levels[i][1]] && clears[data.levels[i][1]][get_input("member")]){
           data.levels[i].push(clears[data.levels[i][1]][get_input("member")].cleared)
           data.levels[i].push(clears[data.levels[i][1]][get_input("member")].vote)
+          data.levels[i].push(clears[data.levels[i][1]][get_input("member")].liked)
       } else {
         data.levels[i].push("-")
         data.levels[i].push("-")  
+        data.levels[i].push("-")
       }
       var curr_tags=data.levels[i][9].split(",")
 
@@ -152,7 +159,7 @@ html.dark .dataTables_wrapper .dataTables_paginate {
         curr_tags.unshift("Pending")
       }
       if(spig_fav.indexOf(data.levels[i][1])!=-1){
-        curr_tags.unshift("Spig ♥")
+        //curr_tags.unshift("Spig ♥")
       }
       data.levels[i][9]=curr_tags.join(",")
 
@@ -392,12 +399,22 @@ function copyClipboard(str){
                     }
                     
                 },
-                targets:13
+                targets:14
             },{
                 "render": function ( data, type, row ) {
                     return isNaN(data)||data==0?"":Number(data).toFixed(1);
                 },
-                targets:14
+                targets:15
+            },{
+                "render": function ( data, type, row ) {
+                     if ( type !="display" ) {
+                        return data=="1"?"1":"0";
+                    } else {
+                        return (data=="1"?'<i title="Entered player has likedthis level." data-toggle="tooltip" class="fa fa-check text-success" aria-hidden="true"></i>': "");
+                    }
+                    
+                },
+                targets:16
             },
              {
                 defaultContent:"",
@@ -490,9 +507,11 @@ getData()
     <th style="width:5em">Tags</th>
     <th style="width:5em">Code</th>
     <th style="width:10px">Clears</th>    
-    <th style="width:10px">TS Vote</th>    
+    <th style="width:10px">TS Vote</th>
+    <th style="width:10px">Likes</th>    
     <th style="width:10px">Cleared</th>    
-    <th style="width:10px">Your Vote</th>    
+    <th style="width:10px">Your Vote</th>
+    <th style="width:10px">You Liked</th>    
   </tr></thead>
 </table>
 </div>
