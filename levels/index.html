@@ -91,13 +91,15 @@ html.dark .dataTables_wrapper .dataTables_paginate {
   makeDark()
 
 
-    
+  var headers={
+    played:{"Code":0,"Player":1,"Completed":2,"Shelder":3,"Liked":4,"DifficultyVote":5,"Timestamp":6},
+    levels:{"No":0,"Code":1,"Creator":2,"LevelName":3,"Difficulty":4,"LevelStatus":5,"NewCode":6,"ClearVideo":7,"Timestamp":8,"Tags":9} //the no. is added in the code itslef.
+  }
 
   function refresh(){
     data=JSON.parse(raw_data)
     var level_headers=data.levels.shift()
     var played_headers=data.played.shift()
-    spig_fav=[]
     clearers=[]
     clears={}
     tag_labels=data.tags
@@ -105,75 +107,90 @@ html.dark .dataTables_wrapper .dataTables_paginate {
     var current_tag=params.get("tag")
 
     for(var i=0;i<data.played.length;i++){
-      if(data.played[i][1]=="Space_Pig" && data.played[i][4]=="1"){
-        spig_fav.push(data.played[i][0])
-      }
-      if(clearers.indexOf(data.played[i][1])==-1){
+      if(clearers.indexOf(data.played[i][1])==-1){ //getting all the people who have submitted clears
         clearers.push(data.played[i][1])
       }
       if(!clears[data.played[i][0]]) clears[data.played[i][0]]={}
-        clears[data.played[i][0]][data.played[i][1]]={cleared:data.played[i][2],vote:data.played[i][5],liked:data.played[i][4]=="1"}
+      clears[data.played[i][0]][data.played[i][1]]={ //compiling the clears in a [level-code][player] format
+        cleared:data.played[i][2],
+        vote:data.played[i][5],
+        liked:data.played[i][4]=="1"
+      } 
     }
 
 
-
-  $('#registeredName').typeahead({source: clearers});
+  $('#registeredName').typeahead({source: clearers}); 
 
     var filtered_levels=[];
-    for(var i=0;i<data.levels.length;i++){
-      data.levels[i].unshift(i+1)
+    for(var i=0;i<data.levels.length;i++){ //main loop that processes all the stats for the levels
+      data.levels[i].unshift(i+1) //adds the id.
+
+      //internal variables
       var tsclears=0;
       var votesum=0;
       var votetotal=0;
       var likes=0;
-      if(clears[data.levels[i][1]]){
-        for(var j in clears[data.levels[i][1]]){
-          if(clears[data.levels[i][1]][j].cleared=="1" && j!=data.levels[i][2]){
+
+      //data definition
+      var current_level=data.levels[i][1];
+      var current_creator=data.levels[i][2];
+
+      if(clears[current_level]){
+        for(var player in clears[current_level]){
+          if(clears[current_level][player].cleared=="1" && player!=current_creator){
             tsclears++;
           }
-          if(clears[data.levels[i][1]][j].vote){
+          if(clears[current_level][player].vote){
             votetotal++;
-            votesum+=Number(clears[data.levels[i][1]][j].vote)
+            votesum+=Number(clears[current_level][player].vote)
           }
-          if(clears[data.levels[i][1]][j].liked){
+          if(clears[current_level][player].liked){
             likes++;
           }
 
         }
       }
-      data.levels[i].push(tsclears) //your vote
-      data.levels[i].push(votetotal>0? ((votesum/votetotal).toFixed(1))+","+votetotal:"0,0") //cleared
+
+
+      data.levels[i].push(tsclears) //no. of clears
+      data.levels[i].push(votetotal>0? ((votesum/votetotal).toFixed(1))+","+votetotal:"0,0") //avg vote, num votes
       data.levels[i].push(likes) //liked
-      if(clears[data.levels[i][1]] && clears[data.levels[i][1]][get_input("member")]){
-          data.levels[i].push(clears[data.levels[i][1]][get_input("member")].cleared)
-          data.levels[i].push(clears[data.levels[i][1]][get_input("member")].vote)
-          data.levels[i].push(clears[data.levels[i][1]][get_input("member")].liked)
+      if(clears[current_level] && clears[current_level][get_input("member")]){ //if this clear is made by the current entered user
+          data.levels[i].push(clears[current_level][get_input("member")].cleared)
+          data.levels[i].push(clears[current_level][get_input("member")].vote)
+          data.levels[i].push(clears[current_level][get_input("member")].liked)
       } else {
         data.levels[i].push("-")
         data.levels[i].push("-")  
         data.levels[i].push("-")
       }
-      var curr_tags=data.levels[i][9].split(",")
 
+
+      //adding automatic tags
+      var curr_tags=data.levels[i][9].split(",")
       if(data.levels[i][5]=="0"){
         curr_tags.unshift("Pending")
       }
-      if(spig_fav.indexOf(data.levels[i][1])!=-1){
-        //curr_tags.unshift("Spig ♥")
-      }
       data.levels[i][9]=curr_tags.join(",")
 
+
       var include=true;
+
+
+      //get all the tags used from the data set
       for(var k=0;k<curr_tags.length;k++){
         if(curr_tags[k] && tags_list.indexOf(curr_tags[k])=="-1")
           tags_list.push(curr_tags[k])
       }
 
-      if(current_tag){
+
+
+      if(current_tag){ //if a tag is selected
+        //if the level doen't have the current tag, don't include
         if(curr_tags.indexOf(current_tag)=="-1"){
           include=false
         }
-      } else { //default view
+      } else { //default view. default view doesn't select certain tags like TeamConsistency
         for(var k=0;k<curr_tags.length;k++){
           if(data.seperate.indexOf(curr_tags[k])!="-1"){
             include=false
@@ -187,7 +204,7 @@ html.dark .dataTables_wrapper .dataTables_paginate {
       }
 
       
-    }
+    } //end main level loops
 
     var tempSelect="<option value=''>Default</option>"
     for(var k=0;k<tags_list.length;k++){
@@ -202,14 +219,13 @@ html.dark .dataTables_wrapper .dataTables_paginate {
     }
     //
     if(!get_input('approved') || get_input('approved')=="1"||get_input('approved')=="2"){
-
       datatable.column(5).search( (get_input('approved')=="2"?'"0"':'"1"'),false,true)  
     } else {
       datatable.column(5).search( "",false,true)  
     }
 
     if(get_input("cleared")=="2"||get_input("cleared")=="3"){
-      datatable.column(13).search(get_input('cleared')=="3"?'"1"':'"0"',false,true)  
+      datatable.column(14).search(get_input('cleared')=="3"?'"1"':'"0"',false,true)  
     }
     
     datatable.draw();
@@ -418,7 +434,7 @@ function copyClipboard(str){
             },
              {
                 defaultContent:"",
-                targets:[6,7,8,9,10,11,12,13,14]
+                targets:[6,7,8,9,10,11,12,13,14,15,16]
             },
             //{ "visible": false,  "targets": [ 3 ] }
         ]
