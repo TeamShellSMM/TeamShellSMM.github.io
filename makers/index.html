@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>#TeamShell Makers</title>
+
+<link href="https://fonts.googleapis.com/css?family=Bangers&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js" rel="stylesheet">
+<link href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+
+
+<style> 
+
+tr td:nth-child(1),th,h1,h2,h3,h4 {font-family: 'Bangers', sans-serif;}
+th {font-size: 12pt}
+h1 {font-size:64pt;}
+table {width:100%;}
+img {width: 36px}
+#logo {position: absolute;right:0px;background: #FFF}
+.green {color:#01a09e;}
+.orange {color:#f88501;}
+.copy {cursor:pointer;-webkit-transition: color 0.5s; /* Safari prior 6.1 */
+  transition: color 0.5s;}
+#refresh {cursor: pointer;}
+.points {text-align: right;font-family:monospace;font-weight: bold;font-size:1.2em;}
+
+html.dark body {background:#121212;color:#FFF;}
+
+html.dark table.dataTable.stripe tbody tr.odd,
+html.dark table.dataTable.display tbody tr.odd {
+  background-color: #222;
+}
+html.dark table.dataTable tbody tr {
+background-color: #111;
+}
+
+html.dark table.dataTable tbody tr {
+background-color: #111;
+}
+
+html.dark table.dataTable.stripe.hover tbody tr.odd:hover,
+html.dark table.dataTable.display.hover tbody tr.odd:hover {
+  background-color: #444;
+}
+
+html.dark table.dataTable.hover tbody tr:hover {
+background-color: #222;
+}
+
+
+html.dark .dataTables_wrapper .dataTables_length,
+html.dark .dataTables_wrapper .dataTables_filter,
+html.dark .dataTables_wrapper .dataTables_info,
+html.dark .dataTables_wrapper .dataTables_processing,
+html.dark .dataTables_wrapper .dataTables_paginate {
+    color: #FFF;
+}
+</style>
+
+<script>
+function ObjectLength_Modern( object ) {
+    if(!object) return 0
+    return Object.keys(object).length;
+}
+
+function ObjectLength_Legacy( object ) {
+    if(!object) return 0
+    var length = 0;
+    for( var key in object ) {
+        if( object.hasOwnProperty(key) ) {
+            ++length;
+        }
+    }
+    return length;
+}
+
+var ObjectLength = Object.keys ? ObjectLength_Modern : ObjectLength_Legacy;
+
+  var first_load = true;
+  var data,level_headers,tag_labels,clears,raw_data;
+  var params=new URLSearchParams(window.location.search)
+
+
+  function setDark(val){
+    if(val){
+      localStorage.setItem("dark","1")
+    } else {
+      localStorage.removeItem("dark")
+    }
+  }
+
+  if(params.get("dark")){
+    setDark(params.get("dark")==="1")
+  } 
+  
+  function makeDark(){
+      document.getElementsByTagName("html")[0].className=localStorage.getItem("dark")==="1"?"dark":""
+  }
+
+  makeDark()
+
+function sum(obj){
+  if(!obj) return 0
+  var ret=0
+  for(var i in obj){
+    ret+=obj[i]
+  }
+  return ret
+}
+    
+var new_codes
+
+function within_season(date,seasons){
+    var min_date = 0;
+    var max_date = 99999999999;
+
+    for(var i = 0; i < seasons.length; i++){
+      var to_date;
+      if(i == (seasons.length - 1)){
+        to_date = max_date;
+      } else {
+        to_date = seasons[i + 1].startdate;
+      }
+
+      var from_date;
+      if(seasons[i].startdate == ""){
+        from_date = min_date;
+      } else {
+        from_date = seasons[i].startdate;
+      }
+
+      if(get_input("timePeriod") == (i + 1) && date >= from_date && date < to_date){
+        return true;
+      }
+    }
+    return false;
+}
+
+function get_maker_points(likes, clears, difficultyPoints){
+    if(clears == 0){
+      return 0;
+    }
+    return ((likes * 2 + clears)*difficultyPoints) * (likes/clears);
+}
+
+
+  function refresh(){
+    data=JSON.parse(raw_data)
+    var level_headers=data.levels.shift()
+    var played_headers=data.played.shift()
+    var members_headers=data.members.shift()
+    var point_header=data.points.shift()
+    var _points={0:0}
+
+    for(var i=0;i<data.points.length;i++){
+      _points[parseFloat(data.points[i][0])]=parseFloat(data.points[i][1]);
+    }
+    data.points=_points
+
+    var levels={}; 
+
+    var selectNode = document.getElementById('timePeriod');
+    while(selectNode.firstChild){
+      selectNode.removeChild(selectNode.firstChild);
+    }
+
+    for(var i = 0; i < data.seasons.length; i++){
+      var opt = document.createElement('option');
+      opt.value = i + 1;
+      opt.innerHTML = data.seasons[i].name;
+      selectNode.appendChild(opt);
+    }
+
+    if(first_load){
+      //Set Season to max season
+      selectNode.value = data.seasons.length;
+      first_load = false;
+    }
+    
+
+    for (var i=1;i<data.reuploaded.length;i++){
+      if(within_season(data.reuploaded[i][7], data.seasons)){
+        levels[data.reuploaded[i][0]]={
+          "new":data.reuploaded[i][5], 
+          "difficulty":parseFloat(data.reuploaded[i][3]),
+          "creator": data.reuploaded[i][1],
+          "clears": 0,
+          "likes": 0
+        }
+      }
+    }
+    for (var i=0;i<data.levels.length;i++){
+      if(within_season(data.levels[i][7], data.seasons) && data.levels[i][4]){
+        levels[data.levels[i][0]]={
+          "new":data.levels[i][0],
+          "difficulty":parseFloat(data.levels[i][3]),
+          "creator": data.levels[i][1],
+          "clears": 0,
+          "likes": 0
+        }
+      }
+    }
+
+    for(var i=0;i<data.played.length;i++){
+      if(levels[data.played[i][0]]){
+        if(data.played[i][4] == "1"){
+          levels[data.played[i][0]]["likes"] = levels[data.played[i][0]]["likes"] ? levels[data.played[i][0]]["likes"] + 1 : 1;
+        }
+        if(data.played[i][2] == "1"){
+          levels[data.played[i][0]]["clears"] = levels[data.played[i][0]]["clears"] ? levels[data.played[i][0]]["clears"] + 1 : 1;
+        }        
+      }
+    }
+
+    //console.log("the levels are", levels);
+
+    var makers = {};
+    for(var levelCode in levels){
+      if(!makers[levels[levelCode].creator]){
+        makers[levels[levelCode].creator] = {
+          "levelcount": 0,
+          "clears": 0,
+          "likes": 0,
+          "ratio": 0,
+          "points": 0,
+          "shelder": 0,
+          "cult_member": 0
+        };
+      }
+
+      makers[levels[levelCode].creator].levelcount++;
+      makers[levels[levelCode].creator].likes += levels[levelCode].likes;
+      makers[levels[levelCode].creator].clears += levels[levelCode].clears;
+      makers[levels[levelCode].creator].points += get_maker_points(levels[levelCode].likes, levels[levelCode].clears, data.points[levels[levelCode].difficulty]);
+    }
+
+    for(var i = 0; i < data.members.length; i++){
+      if(!makers[data.members[i][0]]){
+        makers[data.members[i][0]] = {
+          "levelcount": 0,
+          "clears": 0,
+          "likes": 0,
+          "ratio": 0,
+          "points": 0,
+          "shelder": 0,
+          "cult_member": 0
+        };
+      }
+      makers[data.members[i][0]].shelder = data.members[i][1];
+      makers[data.members[i][0]].cult_member = data.members[i][2];
+    }
+
+    var toShow = [];
+    for(var creatorName in makers){
+      if(makers[creatorName].clears){
+        makers[creatorName].ratio = Math.round(makers[creatorName].likes / makers[creatorName].clears * 100);
+      } else {
+        makers[creatorName].ratio = 0;
+      }
+      makers[creatorName].points = Math.round(makers[creatorName].points);
+
+      var row = [
+        creatorName,
+        makers[creatorName].shelder,
+        makers[creatorName].cult_member,
+        makers[creatorName].levelcount,
+        makers[creatorName].clears,
+        makers[creatorName].likes,
+        makers[creatorName].ratio,
+        makers[creatorName].points
+      ];
+      
+      toShow.push(row);
+    }
+
+    //console.log("makers are", makers);
+
+
+    var datatable=$('#table').DataTable()
+    datatable.clear();
+    datatable.rows.add(toShow)
+    datatable.column(1).search("")
+    datatable.column(2).search("")
+    datatable.column(3).search("")
+
+    if(get_input('creator')){
+      datatable.column(2).search('"'+get_input('creator')+'"',false,true)
+    }
+    //
+    if(get_input('membershipStatus')=="1"){ //members
+      datatable.column(2).search("1",false,true)  
+    } else if(get_input('membershipStatus')=="2") { //shelders
+      datatable.column(1).search("1",false,true)  
+    } else if(get_input('membershipStatus')=="3") { //pending
+      
+      datatable.column(2).search('^$', true, false) 
+      datatable.column(3).search('^[1-9]$', true, false) //wont work for points. have to filter in data itself
+    } else if(get_input('membershipStatus')=="4") { //unoffical
+      datatable.column(2).search('^$', true, false) 
+    }
+
+
+    
+    datatable.draw();
+    $('[data-toggle="tooltip"],.copy,#refresh,#submitButton').tooltip()
+    $('.copy').click(function(){
+     var code=$(this).parent().text().substring(0,11);
+     var old_title="Copy tsclear code"
+     var new_title="Code copied."
+     
+     $(this).addClass("text-success")
+      $(this).tooltip('hide')
+          .attr('title', new_title)
+          .attr('data-original-title', new_title)
+          .tooltip('update')
+          .tooltip('show')
+      var temp=this
+     
+     setTimeout(function(){
+      $(temp).removeClass("text-success")
+       $(temp).tooltip('hide')
+          .attr('title', old_title)
+          .attr('data-original-title', old_title)
+          .tooltip('update')
+          .tooltip('enable')
+     },2000)
+    copyClipboard(code)
+  })
+
+  }
+function copyClipboard(str){
+  const el = document.createElement('textarea');
+  el.value = "!tsclear "+str;
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand('copy');
+  document.body.removeChild(el);
+
+}
+
+
+  
+
+
+  function store_input(query_name,obj){
+    if(params.get(query_name)){
+      localStorage.setItem(query_name,params.get(query_name))
+      $(obj).val(params.get(query_name))
+    } else if(localStorage.getItem(query_name)){
+      $(obj).val(localStorage.getItem(query_name))
+    } else {
+      localStorage.setItem(query_name,$(obj).val())
+    }
+  }
+  
+  function get_input(query_name){
+    return localStorage.getItem(query_name)
+  }
+
+  function setGetParam(key,value) {
+    localStorage.setItem(key,value)
+    if (history.pushState) {
+      var params = new URLSearchParams(window.location.search);
+      params.set(key, value);
+      var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + params.toString();
+      window.history.pushState({path:newUrl},'',newUrl);
+    }
+  }
+
+  $(function(){
+
+    $("#darkmode").change(function(){
+      setDark($(this).prop("checked"))
+      makeDark()
+    }).prop("checked",localStorage.getItem("dark"))
+
+
+
+    store_input('membershipStatus','#membershipStatus')
+    store_input('timePeriod','#timePeriod')
+    store_input('timePeriod2','#timePeriod2')
+
+
+    $("#membershipStatus").change(function(){
+      localStorage.setItem("membershipStatus",this.value)
+      refresh()
+    })
+
+    $("#timePeriod").change(function(){
+      localStorage.setItem("timePeriod",this.value)
+      refresh()
+    })
+    $("#timePeriod2").change(function(){
+      localStorage.setItem("timePeriod2",this.value)
+      refresh()
+    })
+
+    $("#refresh").click(function(){
+      getData()
+    })
+
+    $('#table').DataTable({
+      "language": {
+      "emptyTable": "Data is loading. You may have to whitelist this site for browser extensions that block third party scripts",
+      "info":           "_TOTAL_ records",
+      "infoEmpty":      "0 records",
+      "infoFiltered":   "/ _MAX_ records",
+      },
+      //responsive:true,
+      paging:false,
+      dom : "iti",
+      "order": [[ 7, "desc" ]],
+      "columnDefs": [
+         {
+            "render": function ( data, type, row ) {
+                    return "<div class='points'>"+data+"</div>"
+                },
+                //"orderable": false,
+                targets:7,
+            },
+            {
+            "render": function ( data, type, row ) {
+                    return data+"%"
+                },
+                //"orderable": false,
+                targets:6,
+            },
+            {
+                
+                visible: false,
+                targets:[1,2]
+            }
+     ],
+      
+            //{ "visible": false,  "targets": [ 3 ] }
+    })
+
+
+function getData(){
+    var datatable=$('#table').DataTable()
+    datatable.clear().draw();
+    $.getJSON("https://script.google.com/macros/s/AKfycbwOZQzoqLRYbwSoTYWgJeT1A-YKfDKJf_2jqNBm5qmr_BncNL8/exec?callback=?").done(function(_data){
+    raw_data=JSON.stringify(_data)
+
+    refresh()
+  })
+}
+
+getData()
+  })
+</script>
+</head>
+<body class="dark">
+<div class="container-fluid">
+<h1><img src="buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Makers</h1>
+<h4>Join the discord for more information: <a href="https://discord.gg/7tQJewa">https://discord.gg/7tQJewa</a></h4>
+<div class="form-check">
+  <input class="form-check-input" type="checkbox" value="" id="darkmode">
+  <label class="form-check-label" for="darkmode">Dark Mode <i class="fa fa-moon-o" aria-hidden="true"></i></label>
+</div>
+
+  <div class="form-group row">
+<div class="col-md-3">
+  <label for="membershipStatus">Members</label>
+  <select name="membershipStatus" id="membershipStatus" class="form-control">
+        <option value="1" selected>Members</option>
+        <option value="2">Shelders</option>
+        <option value="3">Pending Initiation</option>
+        <option value="4">Unoffical</option>
+      </select>
+      <small class="form-text text-muted">Filtered records with zero points will be hidden.</small>
+    </div>
+  
+
+  <div class="col-md-6">
+  <label for="timePeriod">Season</label>
+  <select name="timePeriod" id="timePeriod" class="form-control">
+    <option value="1" selected>Loading Seasons...</option>
+      </select>
+      <small class="form-text text-muted">Includes only the levels submitted within that season</small>
+    </div>
+  </div>
+
+
+  
+
+<table id="table" class="compact row-border stripe hover" style="width:100%">
+  <thead><tr>
+    <th>Member Name</th>
+    <th>Shelder</th>
+    <th>Member</th>
+    <th>Levels Created</th>
+    <th>Clears</th>
+    <th>Likes</th>
+    <th>Like/Clear Ratio</th>
+    <th>TS Maker Points</th>
+  </tr></thead>
+</table>
+
+</div>
+</body>
+</html>
