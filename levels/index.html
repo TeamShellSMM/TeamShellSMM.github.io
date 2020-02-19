@@ -31,18 +31,28 @@ img {width: 36px}
   transition: color 0.5s;}
 #refresh {cursor: pointer;}
 
-html.dark body {background:#121212;color:#FFF;}
 
+/* Dark Mode */
+html.dark body {
+  background:#121212;
+  color:#FFF;
+}
+
+html.dark .text-muted {
+  color: #aaa !important
+}
+
+/* Dark Tables */
 html.dark table.dataTable.stripe tbody tr.odd,
 html.dark table.dataTable.display tbody tr.odd {
   background-color: #222;
 }
 html.dark table.dataTable tbody tr {
-background-color: #111;
+  background-color: #111;
 }
 
 html.dark table.dataTable tbody tr {
-background-color: #111;
+  background-color: #111;
 }
 
 html.dark table.dataTable.stripe.hover tbody tr.odd:hover,
@@ -51,17 +61,48 @@ html.dark table.dataTable.display.hover tbody tr.odd:hover {
 }
 
 html.dark table.dataTable.hover tbody tr:hover {
-background-color: #222;
+  background-color: #fff4;
 }
 
+table.dataTable.row-border tbody td {
+  border-color: #444;
+}
 
 html.dark .dataTables_wrapper .dataTables_length,
 html.dark .dataTables_wrapper .dataTables_filter,
 html.dark .dataTables_wrapper .dataTables_info,
 html.dark .dataTables_wrapper .dataTables_processing,
 html.dark .dataTables_wrapper .dataTables_paginate {
-    color: #FFF;
+    color: #fff;
 }
+
+/* Dark Input boxes */
+html.dark .form-control {
+    background-color: #666;
+    color: #fff;
+    border-color: #888;
+}
+html.dark .form-control::placeholder {
+    color: #aaa;
+}
+
+/* Dark Dropdown menus */
+html.dark .dropdown-menu {
+  background-color: #888;
+  color: #fff
+}
+html.dark .dropdown-item {
+  color: #fff;
+}
+html.dark .dropdown-item:focus, html.dark .dropdown-item:hover {
+  background-color: #aaa;
+  color: #fff;
+}
+html.dark select option {
+  background-color: #888;
+  color: #fff;
+}
+
 </style>
 
 <script>
@@ -509,7 +550,7 @@ getData()
 </form>
 <div class="btn btn-block btn-info"><div id="refresh" title='Get new data from the sheet. Useful if you just submitted a clear'>Refresh Data <i class="fa fa-refresh" aria-hidden="true"></i></div></div>
 
-<table id="table" class="compact row-border stripe hover">
+<table id="table" class="compact row-border stripe hover" style="width:100%">
   <thead><tr>
     <th style="width:10px;">No.</th>
     <th style="width:10em;">Level Code</th>

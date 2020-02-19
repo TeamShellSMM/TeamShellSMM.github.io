@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>#TeamShell Members</title>
+<title>#TeamShell Makers</title>
 
 <link href="https://fonts.googleapis.com/css?family=Bangers&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
@@ -86,6 +86,7 @@ function ObjectLength_Legacy( object ) {
 
 var ObjectLength = Object.keys ? ObjectLength_Modern : ObjectLength_Legacy;
 
+  var first_load = true;
   var data,level_headers,tag_labels,clears,raw_data;
   var params=new URLSearchParams(window.location.search)
 
@@ -119,18 +120,37 @@ function sum(obj){
     
 var new_codes
 
-function within_time(date,clear){
-  var varName=clear?"timePeriod2":"timePeriod"
+function within_season(date,seasons){
+    var min_date = 0;
+    var max_date = 99999999999;
 
-    if(get_input(varName)=="1"){ //all time
-      return true;  
-    } else if(get_input(varName)=="2") { //monthly
-      return date>=data.MONTH_START
-    } else if(get_input(varName)=="3") { //weekly
-      return date>=data.WEEK_START
-    } else if(get_input(varName)=="4") { //daily
-      return date>=data.DAY_START
+    for(var i = 0; i < seasons.length; i++){
+      var to_date;
+      if(i == (seasons.length - 1)){
+        to_date = max_date;
+      } else {
+        to_date = seasons[i + 1].startdate;
+      }
+
+      var from_date;
+      if(seasons[i].startdate == ""){
+        from_date = min_date;
+      } else {
+        from_date = seasons[i].startdate;
+      }
+
+      if(get_input("timePeriod") == (i + 1) && date >= from_date && date < to_date){
+        return true;
+      }
     }
+    return false;
+}
+
+function get_maker_points(likes, clears, difficultyPoints){
+    if(clears == 0){
+      return 0;
+    }
+    return ((likes * 2 + clears)*difficultyPoints) * (likes/clears);
 }
 
 
@@ -142,75 +162,128 @@ function within_time(date,clear){
     var point_header=data.points.shift()
     var _points={0:0}
 
-    new_codes={}; //to accomodate reuploads
-    var member_levels={}
-
-    for (var i=1;i<data.reuploaded.length;i++){
-      if(within_time(data.reuploaded[i][7])){
-        new_codes[data.reuploaded[i][0]]={
-          "new":data.reuploaded[i][5], 
-          "difficulty":parseFloat(data.reuploaded[i][3]),
-        }
-      }
-    }
-    for (var i=0;i<data.levels.length;i++){
-      if(within_time(data.levels[i][7])){
-        new_codes[data.levels[i][0]]={
-          "new":data.levels[i][0],
-          "difficulty":parseFloat(data.levels[i][3]),
-        }
-        if(data.levels[i][4]=="1"){
-          member_levels[data.levels[i][1]]=member_levels[data.levels[i][1]]?member_levels[data.levels[i][1]]+1:1
-        }
-      }
-    }
-
-
-
-
-
     for(var i=0;i<data.points.length;i++){
       _points[parseFloat(data.points[i][0])]=parseFloat(data.points[i][1]);
     }
     data.points=_points
-    tag_labels=data.tags
 
-    member_clears={}
-    for(var i=0;i<data.played.length;i++){
-      if(within_time(data.played[i][6],1)){
-        var current_player=data.played[i][1]
-        var current_code=data.played[i][0]
-        
-        if(!member_clears[current_player]){
-          member_clears[current_player]={}
-        }
+    var levels={}; 
 
-        if(new_codes[current_code]){
-          var current_level=new_codes[current_code].new
-          var current_points=data.points[new_codes[current_code].difficulty]
-          if(member_clears[current_player][current_level]){ //if have value assign the largest point
-            member_clears[current_player][current_level]=Math.max(member_clears[current_player][current_level],current_points)
-          } else {
-            member_clears[current_player][current_level]=current_points
-          }
-        }
-      }
+    var selectNode = document.getElementById('timePeriod');
+    while(selectNode.firstChild){
+      selectNode.removeChild(selectNode.firstChild);
     }
 
+    for(var i = 0; i < data.seasons.length; i++){
+      var opt = document.createElement('option');
+      opt.value = i + 1;
+      opt.innerHTML = data.seasons[i].name;
+      selectNode.appendChild(opt);
+    }
 
-
+    if(first_load){
+      //Set Season to max season
+      selectNode.value = data.seasons.length;
+      first_load = false;
+    }
     
-    var toShow=[]
-    for(var i=0;i<data.members.length;i++){
-      var current_player=data.members[i][0]
-      var levels_cleared=member_levels[current_player]? member_levels[current_player]:0;
-      data.members[i].push( levels_cleared ) 
-      data.members[i].push( ObjectLength(member_clears[current_player]) ) //need to fix level clears for self
-      data.members[i].push( sum(member_clears[current_player]).toFixed(1) )
-      if(data.members[i][5]!="0.0"){
-        toShow.push(data.members[i])
+
+    for (var i=1;i<data.reuploaded.length;i++){
+      if(within_season(data.reuploaded[i][7], data.seasons)){
+        levels[data.reuploaded[i][0]]={
+          "new":data.reuploaded[i][5], 
+          "difficulty":parseFloat(data.reuploaded[i][3]),
+          "creator": data.reuploaded[i][1],
+          "clears": 0,
+          "likes": 0
+        }
       }
     }
+    for (var i=0;i<data.levels.length;i++){
+      if(within_season(data.levels[i][7], data.seasons) && data.levels[i][4]){
+        levels[data.levels[i][0]]={
+          "new":data.levels[i][0],
+          "difficulty":parseFloat(data.levels[i][3]),
+          "creator": data.levels[i][1],
+          "clears": 0,
+          "likes": 0
+        }
+      }
+    }
+
+    for(var i=0;i<data.played.length;i++){
+      if(levels[data.played[i][0]]){
+        if(data.played[i][4] == "1"){
+          levels[data.played[i][0]]["likes"] = levels[data.played[i][0]]["likes"] ? levels[data.played[i][0]]["likes"] + 1 : 1;
+        }
+        if(data.played[i][2] == "1"){
+          levels[data.played[i][0]]["clears"] = levels[data.played[i][0]]["clears"] ? levels[data.played[i][0]]["clears"] + 1 : 1;
+        }        
+      }
+    }
+
+    //console.log("the levels are", levels);
+
+    var makers = {};
+    for(var levelCode in levels){
+      if(!makers[levels[levelCode].creator]){
+        makers[levels[levelCode].creator] = {
+          "levelcount": 0,
+          "clears": 0,
+          "likes": 0,
+          "ratio": 0,
+          "points": 0,
+          "shelder": 0,
+          "cult_member": 0
+        };
+      }
+
+      makers[levels[levelCode].creator].levelcount++;
+      makers[levels[levelCode].creator].likes += levels[levelCode].likes;
+      makers[levels[levelCode].creator].clears += levels[levelCode].clears;
+      makers[levels[levelCode].creator].points += get_maker_points(levels[levelCode].likes, levels[levelCode].clears, data.points[levels[levelCode].difficulty]);
+    }
+
+    for(var i = 0; i < data.members.length; i++){
+      if(!makers[data.members[i][0]]){
+        makers[data.members[i][0]] = {
+          "levelcount": 0,
+          "clears": 0,
+          "likes": 0,
+          "ratio": 0,
+          "points": 0,
+          "shelder": 0,
+          "cult_member": 0
+        };
+      }
+      makers[data.members[i][0]].shelder = data.members[i][1];
+      makers[data.members[i][0]].cult_member = data.members[i][2];
+    }
+
+    var toShow = [];
+    for(var creatorName in makers){
+      if(makers[creatorName].clears){
+        makers[creatorName].ratio = Math.round(makers[creatorName].likes / makers[creatorName].clears * 100);
+      } else {
+        makers[creatorName].ratio = 0;
+      }
+      makers[creatorName].points = Math.round(makers[creatorName].points);
+
+      var row = [
+        creatorName,
+        makers[creatorName].shelder,
+        makers[creatorName].cult_member,
+        makers[creatorName].levelcount,
+        makers[creatorName].clears,
+        makers[creatorName].likes,
+        makers[creatorName].ratio,
+        makers[creatorName].points
+      ];
+      
+      toShow.push(row);
+    }
+
+    //console.log("makers are", makers);
 
 
     var datatable=$('#table').DataTable()
@@ -346,15 +419,22 @@ function copyClipboard(str){
       //responsive:true,
       paging:false,
       dom : "iti",
-      "order": [[ 5, "desc" ]],
+      "order": [[ 7, "desc" ]],
       "columnDefs": [
          {
             "render": function ( data, type, row ) {
                     return "<div class='points'>"+data+"</div>"
                 },
                 //"orderable": false,
-                targets:5,
-            }, 
+                targets:7,
+            },
+            {
+            "render": function ( data, type, row ) {
+                    return data+"%"
+                },
+                //"orderable": false,
+                targets:6,
+            },
             {
                 
                 visible: false,
@@ -382,7 +462,7 @@ getData()
 </head>
 <body class="dark">
 <div class="container-fluid">
-<h1><img src="buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Members</h1>
+<h1><img src="buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Makers</h1>
 <h4>Join the discord for more information: <a href="https://discord.gg/7tQJewa">https://discord.gg/7tQJewa</a></h4>
 <div class="form-check">
   <input class="form-check-input" type="checkbox" value="" id="darkmode">
@@ -402,29 +482,13 @@ getData()
     </div>
   
 
-  <div class="col-md-3">
-  <label for="timePeriod">Level Time Period</label>
+  <div class="col-md-6">
+  <label for="timePeriod">Season</label>
   <select name="timePeriod" id="timePeriod" class="form-control">
-        <option value="1" selected>All-Time</option>
-        <option value="2" >Monthly</option>
-        <option value="3">Weekly</option>
-        <option value="4">Daily</option>
+    <option value="1" selected>Loading Seasons...</option>
       </select>
-      <small class="form-text text-muted">Include only the levels submitted within the stated time period.</small>
+      <small class="form-text text-muted">Includes only the levels submitted within that season</small>
     </div>
-
-  <div class="col-md-3">
-  <label for="timePeriod2">Clear Time Period</label>
-  <select name="timePeriod2" id="timePeriod2" class="form-control">
-        <option value="1" selected>All-Time</option>
-        <option value="2" >Monthly</option>
-        <option value="3">Weekly</option>
-        <option value="4">Daily</option>
-      </select>
-      <small class="form-text text-muted">Include only the clears registered within the stated time period.</small>
-    </div>
-  
-
   </div>
 
 
@@ -436,8 +500,10 @@ getData()
     <th>Shelder</th>
     <th>Member</th>
     <th>Levels Created</th>
-    <th>Levels Cleared</th>
-    <th>Points</th>
+    <th>Clears</th>
+    <th>Likes</th>
+    <th>Like/Clear Ratio</th>
+    <th>TS Maker Points</th>
   </tr></thead>
 </table>
 
