@@ -65,6 +65,36 @@ html.dark .dataTables_wrapper .dataTables_processing,
 html.dark .dataTables_wrapper .dataTables_paginate {
     color: #FFF;
 }
+
+
+h1 {
+    margin-bottom: 0;
+}
+
+ul#nav {
+    padding: 0;
+    margin: 0 0 5px;
+}
+
+ul#nav li {
+    font-family: 'Bangers', 'sans-serif';
+    display: inline-block;
+    font-size: 24px;
+    margin: 0 15px 0 0;
+}
+
+ul#nav a {
+    font-weight: bold;
+}
+
+ul#nav li.active a {
+    text-decoration: underline;
+}
+
+ul#nav li.active a:hover {
+    color: #007bff;
+}
+
 </style>
 
 <script>
@@ -463,6 +493,7 @@ getData()
 <body class="dark">
 <div class="container-fluid">
 <h1><img src="buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Makers</h1>
+    <ul id="nav"><li><a href="/levels">Levels</a></li><li class="active"><a href="#">Makers</a></li><li><a href="/members">Members</a></li></ul>
 <h4>Join the discord for more information: <a href="https://discord.gg/7tQJewa">https://discord.gg/7tQJewa</a></h4>
 <div class="form-check">
   <input class="form-check-input" type="checkbox" value="" id="darkmode">
