@@ -125,7 +125,7 @@ function get_maker_points(likes, clears, difficultyPoints){
 
     var levels={}; 
 
-    var selectNode = document.getElementById('timePeriod');
+    var selectNode = document.getElementById('currentSeason');
     while(selectNode.firstChild){
       selectNode.removeChild(selectNode.firstChild);
     }
@@ -350,7 +350,7 @@ function copyClipboard(str){
       refresh()
     })
 
-    $("#timePeriod").change(function(){
+    $("#currentSeason").change(function(){
       current_season = this.value;
       refresh()
     })
@@ -478,8 +478,8 @@ getData()
   
 
   <div class="col-md-6">
-  <label for="timePeriod">Season</label>
-  <select name="timePeriod" id="timePeriod" class="form-control">
+  <label for="currentSeason">Season</label>
+  <select name="currentSeason" id="currentSeason" class="form-control">
     <option disabled selected value="1">Loading Seasons...</option>
       </select>
       <small class="form-text text-muted">Includes only the levels submitted within that season</small>
