@@ -112,3 +112,98 @@ ul#nav li.active a:hover {
     color: #007bff;
     font-weight: normal;
 }
+
+.medals {
+display:inline-block;
+margin-left:-10px;
+}
+.medals:first-of-type {
+margin-left:10px;
+}
+
+.medal {
+width: 20px;
+height: 20px;
+display: inline-block;  
+padding-top: 4px;
+margin-left: -12px;
+}
+.medal:first-of-type {  
+margin-left: 0;
+}
+.coin {
+border-radius: 50%;
+width: 20px;
+height: 20px;
+position: relative;
+margin: 0px auto 0 auto;
+box-shadow: 0px 0px 2px 0px #989898;
+
+}
+.coin:after {
+content: '';
+position: absolute;
+transform: translate(-50%, -50%);
+top: 50%;
+left: 50%;
+width: 12px;
+height: 12px;
+border-radius: inherit;
+}
+.coin-gold {
+border: 1px solid #e0a818;
+background: #F0CD73;
+}
+.coin-gold:after {
+box-shadow: 0 0 0 3px #eabb42;
+}
+.coin-silver {
+border: 1px solid #8fa2ac;
+background: #dde3e6;
+}
+.coin-silver:after {
+box-shadow: 0 0 0 3px #b6c2c9;
+}
+.coin-bronze {
+border: 1px solid #9c5805;
+background: #df7e08;
+}
+.coin-bronze:after {
+box-shadow: 0 0 0 3px #bd6b06;
+}
+.coin-iron {
+border: 1px solid #6c6c6c;
+background: #9b9b9b;
+}
+.coin-iron:after {
+box-shadow: 0 0 0 3px #838383;
+}
+
+@media (min-width: 1500px) {
+.container {
+    max-width: 1440px;
+}
+}
+
+.comp-winners {
+height: calc(100% - 40px);
+padding: 10px;
+background-color: #f9f9f9;
+border-radius: 20px;
+margin-top:20px;
+}
+
+.comp-winners i {
+color: #F0CD73;
+font-size:80px;
+top: calc(50% - 40px);
+position:relative;
+}
+
+.comp-winners h4 {
+text-align:center;
+}
+
+.header-row {
+    height: 200px;
+}
