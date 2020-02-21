@@ -19,7 +19,7 @@
 
 <style> 
 
-tr td:nth-child(3),th,h1,h2,h3,h4 {font-family: 'Bangers', sans-serif;}
+tr td:nth-child(3),th,h1,h2,h3,h4,h5,h6 {font-family: 'Bangers', sans-serif;}
 th {font-size: 12pt}
 h1 {font-size:64pt;}
 table {width:100%;}
@@ -61,6 +61,97 @@ html.dark .dataTables_wrapper .dataTables_info,
 html.dark .dataTables_wrapper .dataTables_processing,
 html.dark .dataTables_wrapper .dataTables_paginate {
     color: #FFF;
+}
+
+.medals {
+  display:inline-block;
+  margin-left:-10px;
+}
+.medals:first-of-type {
+  margin-left:10px;
+}
+
+.medal {
+  width: 20px;
+  height: 20px;
+  display: inline-block;  
+  padding-top: 4px;
+  margin-left: -12px;
+}
+.medal:first-of-type {  
+  margin-left: 0;
+}
+.coin {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  margin: 0px auto 0 auto;
+  box-shadow: 0px 0px 2px 0px #989898;
+
+}
+.coin:after {
+  content: '';
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: inherit;
+}
+.coin-gold {
+  border: 1px solid #e0a818;
+  background: #F0CD73;
+}
+.coin-gold:after {
+  box-shadow: 0 0 0 3px #eabb42;
+}
+.coin-silver {
+  border: 1px solid #8fa2ac;
+  background: #dde3e6;
+}
+.coin-silver:after {
+  box-shadow: 0 0 0 3px #b6c2c9;
+}
+.coin-bronze {
+  border: 1px solid #9c5805;
+  background: #df7e08;
+}
+.coin-bronze:after {
+  box-shadow: 0 0 0 3px #bd6b06;
+}
+.coin-iron {
+  border: 1px solid #6c6c6c;
+  background: #9b9b9b;
+}
+.coin-iron:after {
+  box-shadow: 0 0 0 3px #838383;
+}
+
+@media (min-width: 1500px) {
+  .container {
+    max-width: 1440px;
+  }
+}
+
+.comp-winners {
+  height: calc(100% - 40px);
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  margin-top:20px;
+}
+
+.comp-winners i {
+  color: #F0CD73;
+  font-size:80px;
+  top: calc(50% - 40px);
+  position:relative;
+}
+
+.comp-winners h4 {
+  text-align:center;
 }
 </style>
 
@@ -459,12 +550,31 @@ getData()
 </head>
 <body class="dark">
 <div class="container">
-<h1><img src="buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Levels</h1>
-<h4>Join the discord for more information: <a href="https://discord.gg/7tQJewa">https://discord.gg/7tQJewa</a></h4>
-<div class="form-check">
-  <input class="form-check-input" type="checkbox" value="" id="darkmode">
-  <label class="form-check-label" for="darkmode">Dark Mode <i class="fa fa-moon-o" aria-hidden="true"></i></label>
-</div>
+  <div class="row" style="height: 190px;">
+    <div class="col-md-6">
+      <h1><img src="buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Levels</h1>
+      <h4>Join the discord for more information: <a href="https://discord.gg/7tQJewa">https://discord.gg/7tQJewa</a></h4>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="darkmode">
+        <label class="form-check-label" for="darkmode">Dark Mode <i class="fa fa-moon-o" aria-hidden="true"></i></label>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="row comp-winners" style="display:none;">
+        <div class="col-md-2" style="text-align: center;">
+          <i class="fa fa-trophy"></i>
+        </div>
+        <div class="col-md-10">
+          <div class="">
+            <h4>Winners - Shell and Tell 1 (SMB1-like)</h4>
+            <h6><div class="medal" style="margin-right:10px;"><div class="coin coin-gold"></div></div>Gimme Shellter by Hauspanther (3PG-DT0-NRF)</h6>
+            <h6><div class="medal" style="margin-right:10px;"><div class="coin coin-silver"></div></div>Rocky Mountains: #TeamShell by cheese_chicken3 (C16-BT1-NVG)</h6>
+            <h6><div class="medal" style="margin-right:10px;"><div class="coin coin-bronze"></div></div>#TeamShell: Buckets O. Fun v2 by Dekaizo (3PQ-0PV-LXF)</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 <form>
   <div class="form-group row">
     <div class="col-md-3">

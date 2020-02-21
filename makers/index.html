@@ -65,6 +65,78 @@ html.dark .dataTables_wrapper .dataTables_processing,
 html.dark .dataTables_wrapper .dataTables_paginate {
     color: #FFF;
 }
+
+.medals {
+  display:inline-block;
+  margin-left:-10px;
+}
+.medals:first-of-type {
+  margin-left:10px;
+}
+
+.medal {
+  width: 20px;
+  height: 20px;
+  display: inline-block;  
+  padding-top: 4px;
+  margin-left: -12px;
+}
+.medal:first-of-type {  
+  margin-left: 0;
+}
+.coin {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  margin: 0px auto 0 auto;
+  box-shadow: 0px 0px 2px 0px #989898;
+
+}
+.coin:after {
+  content: '';
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: inherit;
+}
+.coin-gold {
+  border: 1px solid #e0a818;
+  background: #F0CD73;
+}
+.coin-gold:after {
+  box-shadow: 0 0 0 3px #eabb42;
+}
+.coin-silver {
+  border: 1px solid #8fa2ac;
+  background: #dde3e6;
+}
+.coin-silver:after {
+  box-shadow: 0 0 0 3px #b6c2c9;
+}
+.coin-bronze {
+  border: 1px solid #9c5805;
+  background: #df7e08;
+}
+.coin-bronze:after {
+  box-shadow: 0 0 0 3px #bd6b06;
+}
+.coin-iron {
+  border: 1px solid #6c6c6c;
+  background: #9b9b9b;
+}
+.coin-iron:after {
+  box-shadow: 0 0 0 3px #838383;
+}
+
+@media (min-width: 1500px) {
+  .container {
+    max-width: 1440px;
+  }
+}
 </style>
 
 <script>
@@ -87,7 +159,8 @@ function ObjectLength_Legacy( object ) {
 var ObjectLength = Object.keys ? ObjectLength_Modern : ObjectLength_Legacy;
 
   var first_load = true;
-  var data,level_headers,tag_labels,clears,raw_data;
+  var data,level_headers,tag_labels,clears,raw_data,comp_winners;
+  var current_season = 1;
   var params=new URLSearchParams(window.location.search)
 
 
@@ -139,7 +212,7 @@ function within_season(date,seasons){
         from_date = seasons[i].startdate;
       }
 
-      if(get_input("timePeriod") == (i + 1) && date >= from_date && date < to_date){
+      if(current_season == (i + 1) && date >= from_date && date < to_date){
         return true;
       }
     }
@@ -162,6 +235,8 @@ function get_maker_points(likes, clears, difficultyPoints){
     var point_header=data.points.shift()
     var _points={0:0}
 
+    comp_winners = data.comp_winners;
+
     for(var i=0;i<data.points.length;i++){
       _points[parseFloat(data.points[i][0])]=parseFloat(data.points[i][1]);
     }
@@ -179,13 +254,13 @@ function get_maker_points(likes, clears, difficultyPoints){
       opt.value = i + 1;
       opt.innerHTML = data.seasons[i].name;
       selectNode.appendChild(opt);
+
+      if(data.seasons[i].startdate != "" && moment().utc() > moment.unix(parseInt(data.seasons[i].startdate)).utc()){
+        current_season = i + 1;
+      }
     }
 
-    if(first_load){
-      //Set Season to max season
-      selectNode.value = data.seasons.length;
-      first_load = false;
-    }
+    selectNode.value = current_season;
     
 
     for (var i=1;i<data.reuploaded.length;i++){
@@ -387,8 +462,6 @@ function copyClipboard(str){
 
 
     store_input('membershipStatus','#membershipStatus')
-    store_input('timePeriod','#timePeriod')
-    store_input('timePeriod2','#timePeriod2')
 
 
     $("#membershipStatus").change(function(){
@@ -397,11 +470,7 @@ function copyClipboard(str){
     })
 
     $("#timePeriod").change(function(){
-      localStorage.setItem("timePeriod",this.value)
-      refresh()
-    })
-    $("#timePeriod2").change(function(){
-      localStorage.setItem("timePeriod2",this.value)
+      current_season = this.value;
       refresh()
     })
 
@@ -435,6 +504,49 @@ function copyClipboard(str){
                 //"orderable": false,
                 targets:6,
             },
+            { "render": function ( data, type, row ) {
+                    let goldsHtml = "";
+                    let silversHtml = "";
+                    let bronzesHtml = "";
+                    let ironsHtml = "";
+
+                    for(var i = 0; i < comp_winners.length; i++){
+                      if(data == comp_winners[i][1]){
+                        switch(comp_winners[i][3]){
+                          case "1":
+                            goldsHtml += '<div class="medal" title="Gold medalist of ' + comp_winners[i][2] + '"><div class="coin coin-gold"></div></div>';
+                          break;
+                          case "2":
+                            goldsHtml += '<div class="medal" title="Silver medalist of ' + comp_winners[i][2] + '"><div class="coin coin-silver"></div></div>';                          
+                          break;
+                          case "3":
+                            goldsHtml += '<div class="medal" title="Bronze medalist of ' + comp_winners[i][2] + '"><div class="coin coin-bronze"></div></div>';                          
+                          break;
+                          case "4":
+                            goldsHtml += '<div class="medal" title="Runner-up of ' + comp_winners[i][2] + '"><div class="coin coin-iron"></div></div>';                          
+                          break;
+                        }
+                      }
+                    }
+
+                    var medalsHtml = "";
+                    if(goldsHtml != ""){
+                      medalsHtml += '<div class="medals">' + goldsHtml + '</div>';
+                    }
+                    if(silversHtml != ""){
+                      medalsHtml += '<div class="medals">' + silversHtml + '</div>';
+                    }
+                    if(bronzesHtml != ""){
+                      medalsHtml += '<div class="medals">' + bronzesHtml + '</div>';
+                    }
+                    if(ironsHtml != ""){
+                      medalsHtml += '<div class="medals">' + ironsHtml + '</div>';
+                    }  
+
+                    return data + medalsHtml;
+                },
+                targets: 0
+            },
             {
                 
                 visible: false,
@@ -461,7 +573,7 @@ getData()
 </script>
 </head>
 <body class="dark">
-<div class="container-fluid">
+<div class="container">
 <h1><img src="buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Makers</h1>
 <h4>Join the discord for more information: <a href="https://discord.gg/7tQJewa">https://discord.gg/7tQJewa</a></h4>
 <div class="form-check">
@@ -485,7 +597,7 @@ getData()
   <div class="col-md-6">
   <label for="timePeriod">Season</label>
   <select name="timePeriod" id="timePeriod" class="form-control">
-    <option value="1" selected>Loading Seasons...</option>
+    <option disabled selected value="1">Loading Seasons...</option>
       </select>
       <small class="form-text text-muted">Includes only the levels submitted within that season</small>
     </div>
