@@ -10,6 +10,7 @@
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js" rel="stylesheet">
 <link href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" rel="stylesheet"/>
+<link href="../assets/teamshell.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
@@ -18,126 +19,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
 
-
-<style> 
-
-tr td:nth-child(1),th,h1,h2,h3,h4 {font-family: 'Bangers', sans-serif;}
-th {font-size: 12pt}
-h1 {font-size:64pt;}
-table {width:100%;}
-img {width: 36px}
-#logo {position: absolute;right:0px;background: #FFF}
-.green {color:#01a09e;}
-.orange {color:#f88501;}
-.copy {cursor:pointer;-webkit-transition: color 0.5s; /* Safari prior 6.1 */
-  transition: color 0.5s;}
-#refresh {cursor: pointer;}
-.points {text-align: right;font-family:monospace;font-weight: bold;font-size:1.2em;}
-
-html.dark body {background:#121212;color:#FFF;}
-
-html.dark table.dataTable.stripe tbody tr.odd,
-html.dark table.dataTable.display tbody tr.odd {
-  background-color: #222;
-}
-html.dark table.dataTable tbody tr {
-background-color: #111;
-}
-
-html.dark table.dataTable tbody tr {
-background-color: #111;
-}
-
-html.dark table.dataTable.stripe.hover tbody tr.odd:hover,
-html.dark table.dataTable.display.hover tbody tr.odd:hover {
-  background-color: #444;
-}
-
-html.dark table.dataTable.hover tbody tr:hover {
-background-color: #222;
-}
-
-
-html.dark .dataTables_wrapper .dataTables_length,
-html.dark .dataTables_wrapper .dataTables_filter,
-html.dark .dataTables_wrapper .dataTables_info,
-html.dark .dataTables_wrapper .dataTables_processing,
-html.dark .dataTables_wrapper .dataTables_paginate {
-    color: #FFF;
-}
-
-.medals {
-  display:inline-block;
-  margin-left:-10px;
-}
-.medals:first-of-type {
-  margin-left:10px;
-}
-
-.medal {
-  width: 20px;
-  height: 20px;
-  display: inline-block;  
-  padding-top: 4px;
-  margin-left: -12px;
-}
-.medal:first-of-type {  
-  margin-left: 0;
-}
-.coin {
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  position: relative;
-  margin: 0px auto 0 auto;
-  box-shadow: 0px 0px 2px 0px #989898;
-
-}
-.coin:after {
-  content: '';
-  position: absolute;
-  transform: translate(-50%, -50%);
-  top: 50%;
-  left: 50%;
-  width: 12px;
-  height: 12px;
-  border-radius: inherit;
-}
-.coin-gold {
-  border: 1px solid #e0a818;
-  background: #F0CD73;
-}
-.coin-gold:after {
-  box-shadow: 0 0 0 3px #eabb42;
-}
-.coin-silver {
-  border: 1px solid #8fa2ac;
-  background: #dde3e6;
-}
-.coin-silver:after {
-  box-shadow: 0 0 0 3px #b6c2c9;
-}
-.coin-bronze {
-  border: 1px solid #9c5805;
-  background: #df7e08;
-}
-.coin-bronze:after {
-  box-shadow: 0 0 0 3px #bd6b06;
-}
-.coin-iron {
-  border: 1px solid #6c6c6c;
-  background: #9b9b9b;
-}
-.coin-iron:after {
-  box-shadow: 0 0 0 3px #838383;
-}
-
-@media (min-width: 1500px) {
-  .container {
-    max-width: 1440px;
-  }
-}
-</style>
 
 <script>
 function ObjectLength_Modern( object ) {
@@ -573,8 +454,10 @@ getData()
 </script>
 </head>
 <body class="dark">
+
 <div class="container">
-<h1><img src="buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Makers</h1>
+<h1><img src="../assets/buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Makers</h1>
+    <ul id="nav"><li><a href="../levels">Levels</a></li><li class="active"><a href="#">Makers</a></li><li><a href="../members">Members</a></li></ul>
 <h4>Join the discord for more information: <a href="https://discord.gg/7tQJewa">https://discord.gg/7tQJewa</a></h4>
 <div class="form-check">
   <input class="form-check-input" type="checkbox" value="" id="darkmode">
