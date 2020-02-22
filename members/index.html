@@ -102,6 +102,7 @@ function within_time(date,clear){
         new_codes[data.reuploaded[i][0]]={
           "new":data.reuploaded[i][5], 
           "difficulty":parseFloat(data.reuploaded[i][3]),
+          "creator":data.reuploaded[i][1]
         }
       }
     }
@@ -110,6 +111,7 @@ function within_time(date,clear){
         new_codes[data.levels[i][0]]={
           "new":data.levels[i][0],
           "difficulty":parseFloat(data.levels[i][3]),
+          "creator":data.levels[i][1],
         }
         if(data.levels[i][4]=="1"){
           member_levels[data.levels[i][1]]=member_levels[data.levels[i][1]]?member_levels[data.levels[i][1]]+1:1
@@ -137,7 +139,7 @@ function within_time(date,clear){
           member_clears[current_player]={}
         }
 
-        if(new_codes[current_code]){
+        if(data.played[i][2]=="1" && new_codes[current_code] && new_codes[current_code].creator!=current_player){
           var current_level=new_codes[current_code].new
           var current_points=data.points[new_codes[current_code].difficulty]
           if(member_clears[current_player][current_level]){ //if have value assign the largest point
