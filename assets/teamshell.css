@@ -4,7 +4,7 @@ th {font-size: 12pt}
 h1 {font-size:64pt;}
 table {width:100%;}
 img {width: 36px}
-#logo {position: absolute;right:0px;background: #FFF}
+#logo {position: relative;right:0px;background: #FFF}
 .green {color:#01a09e;}
 .orange {color:#f88501;}
 .copy {cursor:pointer;-webkit-transition: color 0.5s; /* Safari prior 6.1 */
@@ -83,6 +83,10 @@ html.dark select option {
     color: #fff;
 }
 
+.form-check {
+    padding-bottom: 5px;
+}
+
 h1 {
     margin-bottom: 0;
 }
@@ -111,6 +115,10 @@ ul#nav li.active a {
 ul#nav li.active a:hover {
     color: #007bff;
     font-weight: normal;
+}
+
+.container {
+    max-width: 1440px;
 }
 
 .medals {
@@ -177,12 +185,6 @@ background: #9b9b9b;
 }
 .coin-iron:after {
 box-shadow: 0 0 0 3px #838383;
-}
-
-@media (min-width: 1500px) {
-.container {
-    max-width: 1440px;
-}
 }
 
 .comp-winners {

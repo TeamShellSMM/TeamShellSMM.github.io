@@ -9,7 +9,7 @@
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js" rel="stylesheet">
-<link href="../assets/teamshell.css" rel="stylesheet">
+<link href="../assets/teamshell.css?v=1.0.4" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
@@ -490,23 +490,23 @@ getData()
 
 <table id="table" class="compact row-border stripe hover" style="width:100%">
   <thead><tr>
-    <th style="width:10px;">No.</th>
-    <th style="width:10em;">Level Code</th>
-    <th style="width:10em">Creator</th>
-    <th>Level Name</th>
-    <th style="width:10px">Difficulty</th>
-    <th>Approved</th>
-    <th style="width:10px">New Code</th>
-    <th style="width:10px">Video</th>
-    <th style="width:5em">Registered On</th>
-    <th style="width:5em">Tags</th>
-    <th style="width:5em">Code</th>
-    <th style="width:10px">Clears</th>    
-    <th style="width:10px">TS Vote</th>
-    <th style="width:10px">Likes</th>    
-    <th style="width:10px">Cleared</th>    
-    <th style="width:10px">Your Vote</th>
-    <th style="width:10px">You Liked</th>    
+    <th style="width:10px;" id="nr">No.</th>
+    <th style="width:10em;" id="lvlcode">Level Code</th>
+    <th style="width:10em" id="creator">Creator</th>
+    <th id="name">Level Name</th>
+    <th style="width:10px" id="dif">Difficulty</th>
+    <th id="appr">Approved</th>
+    <th style="width:10px" id="newcode">New Code</th>
+    <th style="width:10px" id="video">Video</th>
+    <th style="width:5em" id="date">Registered On</th>
+    <th style="width:5em" id="tags">Tags</th>
+    <th style="width:5em" id="code">Code</th>
+    <th style="width:10px" id="clears">Clears</th>    
+    <th style="width:10px" id="vote">TS Vote</th>
+    <th style="width:10px" id="likes">Likes</th>    
+    <th style="width:10px" id="cleared">Cleared</th>    
+    <th style="width:10px" id="yourvote">Your Vote</th>
+    <th style="width:10px" id="youliked">You Liked</th>    
   </tr></thead>
 </table>
 </div>
