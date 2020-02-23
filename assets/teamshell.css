@@ -1,5 +1,6 @@
 
-tr td:nth-child(3),th,h1,h2,h3,h4 {font-family: 'Bangers', sans-serif;}
+th,h1,h2,h3,h4 {font-family: 'Bangers', sans-serif;}
+/* tr td:nth-child(3), maybe use classes next time */
 th {font-size: 12pt}
 h1 {font-size:64pt;}
 table {width:100%;}
