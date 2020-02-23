@@ -46,6 +46,16 @@
       document.getElementsByTagName("html")[0].className=localStorage.getItem("dark")==="1"?"dark":""
   }
 
+  function removeDups(names) {
+    let unique = {};
+    names.forEach(function(i) {
+      if(!unique[i]) {
+        unique[i] = true;
+      }
+    });
+    return Object.keys(unique);
+  }
+
   makeDark()
 
 
@@ -165,6 +175,32 @@
     } //end main level loops
 
     var tempSelect="<option value=''>Default</option>"
+
+
+    //Removing these to put them at the beginning
+    var removeIndexes = [];
+    var removeTags = ["SMB1", "SMB3", "SMW", "NSMBU", "3DW"];
+    for(var i = 0; i < tags_list.length; i++){
+      if(removeTags.indexOf(tags_list[i].toUpperCase()) !== -1){
+        removeIndexes.push(i);
+      }
+    }
+
+    //Reversing to make splicing simpler
+    removeIndexes = removeIndexes.reverse();
+    for(var i = 0; i < removeIndexes.length; i++){
+      tags_list.splice(removeIndexes[i], 1);
+    }
+
+    //Removing duplicates
+    tags_list = removeDups(tags_list);
+
+    //Sorting tags by Alphabet
+    tags_list.sort();
+
+    //Adding Game Types to the beginning
+    tags_list.unshift("SMB1", "SMB3", "SMW", "NSMBU", "3DW");
+
     for(var k=0;k<tags_list.length;k++){
       tempSelect+="<option "+ (current_tag==tags_list[k]?"selected":"")+">"+tags_list[k]+"</option>"
     }
