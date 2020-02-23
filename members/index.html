@@ -102,6 +102,7 @@ function within_time(date,clear){
         new_codes[data.reuploaded[i][0]]={
           "new":data.reuploaded[i][5], 
           "difficulty":parseFloat(data.reuploaded[i][3]),
+          "creator":data.reuploaded[i][1]
         }
       }
     }
@@ -110,6 +111,7 @@ function within_time(date,clear){
         new_codes[data.levels[i][0]]={
           "new":data.levels[i][0],
           "difficulty":parseFloat(data.levels[i][3]),
+          "creator":data.levels[i][1],
         }
         if(data.levels[i][4]=="1"){
           member_levels[data.levels[i][1]]=member_levels[data.levels[i][1]]?member_levels[data.levels[i][1]]+1:1
@@ -137,7 +139,7 @@ function within_time(date,clear){
           member_clears[current_player]={}
         }
 
-        if(new_codes[current_code]){
+        if(data.played[i][2]=="1" && new_codes[current_code] && new_codes[current_code].creator!=current_player){
           var current_level=new_codes[current_code].new
           var current_points=data.points[new_codes[current_code].difficulty]
           if(member_clears[current_player][current_level]){ //if have value assign the largest point
@@ -158,34 +160,45 @@ function within_time(date,clear){
       var levels_cleared=member_levels[current_player]? member_levels[current_player]:0;
       data.members[i].push( levels_cleared ) 
       data.members[i].push( ObjectLength(member_clears[current_player]) ) //need to fix level clears for self
-      data.members[i].push( sum(member_clears[current_player]).toFixed(1) )
+      data.members[i].push( sum(member_clears[current_player]).toFixed(1) ) //need to use object names instead of array index ;_;
       if(data.members[i][5]!="0.0"){
         toShow.push(data.members[i])
       }
     }
 
 
+    toShow.sort(function(a,b){
+      return b[5]-a[5]
+    })
+    for(var i=0;i<toShow.length;i++){
+      toShow[i].unshift(i+1)
+    }
+    console.log(toShow)
+
+
     var datatable=$('#table').DataTable()
     datatable.clear();
     datatable.rows.add(toShow)
-    datatable.column(1).search("")
     datatable.column(2).search("")
     datatable.column(3).search("")
+    datatable.column(4).search("")
 
     if(get_input('creator')){
-      datatable.column(2).search('"'+get_input('creator')+'"',false,true)
+      datatable.column(3).search('"'+get_input('creator')+'"',false,true)
     }
     //
     if(get_input('membershipStatus')=="1"){ //members
-      datatable.column(2).search("1",false,true)  
+      datatable.column(3).search("1",false,true)  
     } else if(get_input('membershipStatus')=="2") { //shelders
-      datatable.column(1).search("1",false,true)  
+      datatable.column(2).search("1",false,true)  
     } else if(get_input('membershipStatus')=="3") { //pending
       
-      datatable.column(2).search('^$', true, false) 
-      datatable.column(3).search('^[1-9]$', true, false) //wont work for points. have to filter in data itself
+      datatable.column(3).search('^$', true, false) 
+      datatable.column(4).search('^[1-9]$', true, false) //wont work for points. have to filter in data itself
     } else if(get_input('membershipStatus')=="4") { //unoffical
-      datatable.column(2).search('^$', true, false) 
+      datatable.column(3).search('^$', true, false) 
+    } else if(get_input('membershipStatus')=="5") { //unoffical
+      datatable.column(3).search("") 
     }
 
 
@@ -298,19 +311,19 @@ function copyClipboard(str){
       //responsive:true,
       paging:false,
       dom : "iti",
-      "order": [[ 5, "desc" ]],
+      "order": [[ 6, "desc" ]],
       "columnDefs": [
          {
             "render": function ( data, type, row ) {
                     return "<div class='points'>"+data+"</div>"
                 },
                 //"orderable": false,
-                targets:5,
+                targets:6,
             }, 
             {
                 
                 visible: false,
-                targets:[1,2]
+                targets:[2,3]
             }
      ],
       
@@ -348,8 +361,8 @@ getData()
   <select name="membershipStatus" id="membershipStatus" class="form-control">
         <option value="1" selected>Members</option>
         <option value="2">Shelders</option>
-        <option value="3">Pending Initiation</option>
         <option value="4">Unoffical</option>
+        <option value="5">All</option>
       </select>
       <small class="form-text text-muted">Filtered records with zero points will be hidden.</small>
     </div>
@@ -385,6 +398,7 @@ getData()
 
 <table id="table" class="compact row-border stripe hover" style="width:100%">
   <thead><tr>
+    <th>No.</th>
     <th>Member Name</th>
     <th>Shelder</th>
     <th>Member</th>
