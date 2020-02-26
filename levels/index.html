@@ -5,23 +5,24 @@
 <title>#TeamShell Levels</title>
 
 <link href="https://fonts.googleapis.com/css?family=Bangers&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js" rel="stylesheet">
 <link href="../assets/teamshell.css?v=1.0.1" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.js"></script>
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
 
-
-<style>
-
-</style>
-
+<!--
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
+-->
 <script>
 
   var data,level_headers,tag_labels,spig_fav,clearers,clears,raw_data;
@@ -74,7 +75,12 @@
     tags_list=[];
     var current_tag=params.get("tag")
 
+    var filtered_plays=[];
+
     for(var i=0;i<data.played.length;i++){
+      if(params.get("code")==data.played[i][0]){
+        filtered_plays.push(data.played[i])
+      }
       if(clearers.indexOf(data.played[i][1])==-1){ //getting all the people who have submitted clears
         clearers.push(data.played[i][1])
       }
@@ -87,9 +93,11 @@
     }
 
 
+
   $('#registeredName').typeahead({source: clearers}); 
 
     var filtered_levels=[];
+
     for(var i=0;i<data.levels.length;i++){ //main loop that processes all the stats for the levels
       data.levels[i].unshift(i+1) //adds the id.
 
@@ -102,6 +110,9 @@
       //data definition
       var current_level=data.levels[i][1];
       var current_creator=data.levels[i][2];
+
+
+
 
       if(clears[current_level]){
         for(var player in clears[current_level]){
@@ -167,12 +178,54 @@
       }
 
 
+
+      if(params.get("creator")){
+        if(data.levels[i][headers.levels.Creator]!=params.get("creator")){
+          include=false
+        }
+      }
+
+      if(get_input("minDifficulty")){
+        if(parseFloat(data.levels[i][headers.levels.Difficulty])<parseFloat(get_input("minDifficulty"))){
+          include=false
+        }
+      }
+      if(get_input("maxDifficulty")){
+        if(parseFloat(data.levels[i][headers.levels.Difficulty])>parseFloat(get_input("maxDifficulty"))){
+          include=false
+        }
+      }
+
+      if(params.get("code")){
+        if(data.levels[i][headers.levels.Code]!=params.get("code")){
+          include=false
+        } else {
+          var current_creator=data.levels[i][headers.levels.Creator];
+          var to_remove=[]
+          for(var j=0;j<filtered_plays.length;j++){
+            if(filtered_plays[j][1]==current_creator){
+              to_remove.push(j)
+            }
+          }
+          for(var j=to_remove.length-1;j>=0;j--){
+            console.log(filtered_plays.splice(j,1))
+          }
+        }
+      }
+
       if(include){
         filtered_levels.push(data.levels[i])  
       }
 
       
     } //end main level loops
+    if(filtered_plays){
+    for(var i=0;i<filtered_plays.length;i++){
+        filtered_plays[i].unshift(i+1)
+      }
+    }
+    console.log(filtered_plays)
+    console.log(filtered_levels)
 
     var tempSelect="<option value=''>Default</option>"
 
@@ -208,8 +261,12 @@
     var datatable=$('#table').DataTable()
     datatable.clear();
     datatable.rows.add(filtered_levels)
-    if(get_input('creator')){
-      datatable.column(2).search('"'+get_input('creator')+'"',false,true)
+
+    if(filtered_plays){
+      var datatable2=$('#playedTable').DataTable()
+      datatable2.clear();
+      datatable2.rows.add(filtered_plays)
+      datatable2.draw();
     }
     //
     if(!get_input('approved') || get_input('approved')=="1"||get_input('approved')=="2"){
@@ -222,6 +279,7 @@
       datatable.column(14).search(get_input('cleared')=="3"?'"1"':'"0"',false,true)  
     }
     
+
     datatable.draw();
     $('[data-toggle="tooltip"],.copy,#refresh,#submitButton').tooltip()
     $('.copy').click(function(){
@@ -247,7 +305,6 @@
      },2000)
     copyClipboard(code)
   })
-
   }
 function copyClipboard(str){
   const el = document.createElement('textarea');
@@ -297,31 +354,14 @@ function copyClipboard(str){
     store_input('member','#registeredName')
     store_input('cleared','#clearedLevel')
     store_input('approved','#pendingLevel')
+    store_input('minDifficulty','#minDifficulty')
+    store_input('maxDifficulty','#maxDifficulty')
 
-/*
-    $("#registeredName").change(function(){
-      setGetParam("member",$(this).val())
-      refresh()
-    }) 
-    $("#clearedLevel").change(function(){
-      setGetParam("cleared",$(this).val())
-      refresh()
-    }) 
-    $("#pendingLevel").change(function(){
-      setGetParam("approved",$(this).val())
-      refresh()
-    }) 
-
-    $("#submitButton").click(function(e){
-      refresh()
-      e.preventDefault()
-      return false;
-    })
-*/
 
     $("#refresh").click(function(){
       getData()
     })
+
 
     $('#table').DataTable({
       "language": {
@@ -336,10 +376,16 @@ function copyClipboard(str){
       "columnDefs": [
            {
             "render": function ( data, type, row ) {
-                    return "<span class='text-monospace'>"+data+"</span> <span class='copy' title='Copy tsclear code'><i class='fa fa-clipboard' aria-hidden='true'></i></span>"
+                    return "<span class='text-monospace'><a href='?code="+encodeURI(data)+"'>"+data+"</a></span> <span class='copy' title='Copy tsclear code'><i class='fa fa-clipboard' aria-hidden='true'></i></span>"
                 },
                 "orderable": false,
                 targets:1,
+            },{
+            "render": function ( data, type, row ) {
+                    return "<a class='creator_name' href='?creator="+encodeURI(data)+"'>"+data+"</a>"
+                },
+                "orderable": false,
+                targets:2,
             },
             {
                 "render": function ( data, type, row ) {
@@ -394,7 +440,7 @@ function copyClipboard(str){
                     data=data.split(",")
                      if ( type !="display" ) {
                         return data[0];
-                    } else {
+                    } else {  
                         return data[0]+"<br/><span class='tag badge badge-secondary'>"+data[1]+" votes</span>";
                     }
                     
@@ -420,7 +466,7 @@ function copyClipboard(str){
                      if ( type !="display" ) {
                         return data=="1"?"1":"0";
                     } else {
-                        return (data=="1"?'<i title="Entered player has likedthis level." data-toggle="tooltip" class="fa fa-check text-success" aria-hidden="true"></i>': "");
+                        return (data=="1"?'<i title="Player has liked this level" data-toggle="tooltip" class="fa fa-heart text-danger" aria-hidden="true"></i>': "");
                     }
                     
                 },
@@ -435,9 +481,94 @@ function copyClipboard(str){
     })
 
 
+ $('#playedTable').DataTable({
+      "language": {
+      "emptyTable": "Data is loading. You may have to whitelist this site for browser extensions that block third party scripts",
+      "info":           "_TOTAL_ players",
+      "infoEmpty":      "0 rows",
+      "infoFiltered":   "/ _MAX_ rows",
+      },
+      paging:false,
+      responsive:true,
+      dom : "iti",
+       "columnDefs": [
+        {
+                visible: false,
+                targets:[1]
+            },{
+                "render": function ( data, type, row ) {
+                     if ( type !="display" ) {
+                        return data=="1"?"1":"0";
+                    } else {
+                        return (data=="1"?'<i title="Player has cleared this level." data-toggle="tooltip" class="fa fa-check text-success" aria-hidden="true"></i>': "");
+                    }
+                    
+                },
+                targets:3
+            },{
+                "render": function ( data, type, row ) {
+                     if ( type !="display" ) {
+                        return data=="1"?"1":"0";
+                    } else {
+                        return (data=="1"?'<i title="This is a Shellder Clear" data-toggle="tooltip" class="fa fa-check text-success" aria-hidden="true"></i>': "");
+                    }
+                    
+                },
+                targets:4
+            },{
+                "render": function ( data, type, row ) {
+                     if ( type !="display" ) {
+                        return data=="1"?"1":"0";
+                    } else {
+                        return (data=="1"?'<i title="This is a Shellder Clear" data-toggle="tooltip" class="fa fa-check text-success" aria-hidden="true"></i>': "");
+                    }
+                    
+                },
+                targets:4
+            },{
+                "render": function ( data, type, row ) {
+                     if ( type !="display" ) {
+                        return data=="1"?"1":"0";
+                    } else {
+                        return (data=="1"?'<i title="Player has liked this level" data-toggle="tooltip" class="fa fa-heart text-danger" aria-hidden="true"></i>': "");
+                    }
+                    
+                },
+                targets:5
+            },{
+                "render": function ( data, type, row ) {
+                     if ( type !="display" ) {
+                        return data
+                    } else {
+                        return data?parseFloat(data).toFixed(1):""
+                    }
+                    
+                },
+                targets:6
+            },{
+                "render": function ( data, type, row ) {
+                     if ( type !="display" ) {
+                        return data
+                    } else {
+                        var day=moment.unix(data)
+                        return day.fromNow()
+                    }
+                    
+                },
+                targets:7
+            }
+          
+      ]
+    })
+
+
+
 function getData(){
     var datatable=$('#table').DataTable()
+    var datatable2=$("#playedTable").DataTable()
     datatable.clear().draw();
+    datatable2.clear().draw();
+    $("#playedTableCont").toggle(params.get("code")!=null)
     $.getJSON("https://script.google.com/macros/s/AKfycbwOZQzoqLRYbwSoTYWgJeT1A-YKfDKJf_2jqNBm5qmr_BncNL8/exec?callback=?").done(function(_data){
     raw_data=JSON.stringify(_data)
 
@@ -456,7 +587,7 @@ getData()
   <div class="row header-row">
     <div class="col-12">
       <h1><img src="../assets/buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Levels</h1>
-      <ul id="nav"><li class="active"><a href="#">Levels</a></li><li><a href="../makers">Makers</a></li><li><a href="../members">Members</a></li></ul>
+      <ul id="nav"><li class="active"><a href="./">Levels</a></li><li><a href="../makers">Makers</a></li><li><a href="../members">Members</a></li></ul>
       <h4>Join the discord for more information: <a href="https://discord.gg/7tQJewa">https://discord.gg/7tQJewa</a></h4>
       <div class="form-check">
         <input class="form-check-input" type="checkbox" value="" id="darkmode">
@@ -482,15 +613,15 @@ getData()
 
 <form>
   <div class="form-group row">
-    <div class="col-md-3">
+    <div class="col-md-6">
     <label for="registeredName">Registered TeamShell Name</label>
     <input name="member" type="text" class="form-control" id="registeredName" autocomplete="off" placeholder="Your registered TeamShell Name">
     <small class="form-text text-muted">This is just to filter out the clears and is optional. Your registered TeamShell name is case sensitive.</small>
     </div>
 
-<div class="col-md-2">
-  <label for="clearedLevel">Cleared</label>
-  <select name="cleared" id="clearedLevel" class="form-control">
+    <div class="col-md-3">
+    <label for="clearedLevel">Cleared</label>
+    <select name="cleared" id="clearedLevel" class="form-control">
         <option value="1" selected>All</option>
         <option value="2">Uncleared Only</option>
         <option value="3">Cleared Only</option>
@@ -499,9 +630,9 @@ getData()
     </div>
   
 
-  <div class="col-md-2">
-  <label for="pendingLevel">Levels</label>
-  <select name="approved" id="pendingLevel" class="form-control">
+      <div class="col-md-3">
+      <label for="pendingLevel">Levels</label>
+      <select name="approved" id="pendingLevel" class="form-control">
         <option value="1" selected>Approved</option>
         <option value="2" >Pending</option>
         <option value="3">All</option>
@@ -509,14 +640,30 @@ getData()
       <small class="form-text text-muted">Approved levels are levels that have been played and approved by a Shellder.</small>
     </div>
 
+  </div>
+  <div class="form-group row">
+    
+  <div class="col-md-3">
+  <label for="minDifficulty">Min Difficulty</label>
+  <input type="number" id="minDifficulty" name="minDifficulty" placeholder="0" step="0.5" min="0" max="12" class="form-control" />
+      <small class="form-text text-muted">Minimum difficulty to show.</small>
+    </div>
+  
+    <div class="col-md-3">
+  <label for="maxDifficulty">Max Difficulty</label>
+  <input type="number" id="maxDifficulty" name="maxDifficulty" placeholder="10"  step="0.5" min="0" max="12" class="form-control" />
+      <small class="form-text text-muted">Maximum difficulty to show.</small>
+    </div>
+  
+
   <div class="col-md-4">
-  <label for="pendingLevel">Tags <span class="tag badge badge-pill badge-success">New</span></label>
+  <label for="tagSelect">Tags</label>
   <select name="tag" id="tagSelect" class="form-control"></select>
       <small class="form-text text-muted">Default view will show all TeamShell Levels.</small>
     </div>
   
 
-    <div class="col-md-1"><label for="submitButton">&nbsp;</label><button type="submit" id="submitButton" class="btn btn-block btn-primary">Filter</button></div>
+    <div class="col-md-2"><label for="submitButton">&nbsp;</label><button type="submit" id="submitButton" class="btn btn-block btn-primary">Filter</button></div>
   </div>
 
 
@@ -545,6 +692,21 @@ getData()
     <th style="width:10px">You Liked</th>    
   </tr></thead>
 </table>
+
+<div id="playedTableCont" style="display: none">
+<table id="playedTable" class="compact row-border stripe hover" style="width:100%;">
+  <thead><tr>
+    <th style="width:10px;">No.</th>
+    <th style="width:10em">Code</th>
+    <th>Player</th>
+    <th style="width:10em">Cleared</th>
+    <th style="width:10em">Shellder</th>
+    <th style="width:10px">Liked</th>
+    <th style="width:10px">Difficulty Voted</th>
+    <th style="width:5em">Submitted</th>
+  </tr></thead>
+</table>
+</div>
 </div>
 </body>
 </html>
