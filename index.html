@@ -9,7 +9,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js" rel="stylesheet">
-<link href="../assets/teamshell.css?v=1.0.2" rel="stylesheet">
+<link href="assets/teamshell.css?v=1.0.2" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
@@ -601,7 +601,7 @@ function getData(){
   })
 }
 
-getData()
+//getData()
   })
 </script>
 </head>
@@ -609,8 +609,8 @@ getData()
 <div class="container">
   <div class="row header-row">
     <div class="col-12">
-      <h1><img src="../assets/buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Levels</h1>
-      <ul id="nav"><li class="active"><a href="./">Levels</a></li><li><a href="../makers">Makers</a></li><li><a href="../members">Members</a></li></ul>
+      <h1><img src="assets/buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Levels</h1>
+      <ul id="nav"><li class="active"><a href="levels">Levels</a></li><li><a href="makers">Makers</a></li><li><a href="members">Members</a></li></ul>
       <h4>Join the discord for more information: <a href="https://discord.gg/7tQJewa">https://discord.gg/7tQJewa</a></h4>
       <div class="form-check">
         <input class="form-check-input" type="checkbox" value="" id="darkmode">
@@ -633,103 +633,6 @@ getData()
       </div>
     </div>
   </div>
-
-<form>
-  <div class="form-group row">
-    <div class="col-md-6">
-    <label for="registeredName">Registered TeamShell Name</label>
-    <input name="member" type="text" class="form-control" id="registeredName" autocomplete="off" placeholder="Your registered TeamShell Name">
-    <small class="form-text text-muted">This is just to filter out the clears and is optional. Your registered TeamShell name is case sensitive.</small>
-    </div>
-
-    <div class="col-md-3">
-    <label for="clearedLevel">Cleared</label>
-    <select name="cleared" id="clearedLevel" class="form-control">
-        <option value="1" selected>All</option>
-        <option value="2">Uncleared Only</option>
-        <option value="3">Cleared Only</option>
-      </select>
-      <small class="form-text text-muted">The clears shown are clears registered to ShellBot 2000 in TeamShell's discord.</small>
-    </div>
-  
-
-      <div class="col-md-3">
-      <label for="pendingLevel">Levels</label>
-      <select name="approved" id="pendingLevel" class="form-control">
-        <option value="1" selected>Approved</option>
-        <option value="2" >Pending</option>
-        <option value="3">All</option>
-      </select>
-      <small class="form-text text-muted">Approved levels are levels that have been played and approved by a Shellder.</small>
-    </div>
-
-  </div>
-  <div class="form-group row">
-    
-  <div class="col-md-3">
-  <label for="minDifficulty">Min Difficulty</label>
-  <input type="number" id="minDifficulty" name="minDifficulty" placeholder="0" step="0.5" min="0" max="12" class="form-control" />
-      <small class="form-text text-muted">Minimum difficulty to show.</small>
-    </div>
-  
-    <div class="col-md-3">
-  <label for="maxDifficulty">Max Difficulty</label>
-  <input type="number" id="maxDifficulty" name="maxDifficulty" placeholder="10"  step="0.5" min="0" max="12" class="form-control" />
-      <small class="form-text text-muted">Maximum difficulty to show.</small>
-    </div>
-  
-
-  <div class="col-md-4">
-  <label for="tagSelect">Tags</label>
-  <select name="tag" id="tagSelect" class="form-control"></select>
-      <small class="form-text text-muted">Default view will show all TeamShell Levels.</small>
-    </div>
-  
-
-    <div class="col-md-2"><label for="submitButton">&nbsp;</label><button type="submit" id="submitButton" class="btn btn-block btn-primary">Filter</button></div>
-  </div>
-
-
-  
-</form>
-<div class="btn btn-block btn-info"><div id="refresh" title='Get new data from the sheet. Useful if you just submitted a clear'>Refresh Data <i class="fa fa-refresh" aria-hidden="true"></i></div></div>
-
-<table id="table" class="compact row-border stripe hover" style="width:100%">
-  <thead><tr>
-    <th style="width:10px;">No.</th>
-    <th style="width:10em;">Level Code</th>
-    <th style="width:10em">Creator</th>
-    <th>Level Name</th>
-    <th style="width:10px">Difficulty</th>
-    <th>Approved</th>
-    <th style="width:10px">New Code</th>
-    <th style="width:10px">Video</th>
-    <th style="width:5em">Registered On</th>
-    <th style="width:5em">Tags</th>
-    <th style="width:5em">Code</th>
-    <th style="width:10px">Clears</th>    
-    <th style="width:10px">TS Vote</th>
-    <th style="width:10px">Likes</th>    
-    <th style="width:10px">Cleared</th>    
-    <th style="width:10px">Your Vote</th>
-    <th style="width:10px">You Liked</th>    
-  </tr></thead>
-</table>
-
-<div id="playedTableCont" style="display: none">
-<table id="playedTable" class="compact row-border stripe hover" style="width:100%;">
-  <thead><tr>
-    <th style="width:10px;">No.</th>
-    <th style="width:10em">Code</th>
-    <th>Player</th>
-    <th style="width:10em">Cleared</th>
-    <th style="width:10em">Shellder</th>
-    <th style="width:10px">Liked</th>
-    <th style="width:10px">Difficulty Voted</th>
-    <th style="width:5em">Submitted</th>
-  </tr></thead>
-</table>
-</div>
 </div>
 </body>
 </html>
