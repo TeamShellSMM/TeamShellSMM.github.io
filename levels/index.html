@@ -25,7 +25,7 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
 -->
 <script>
 
-  var data,level_headers,tag_labels,spig_fav,clearers,clears,raw_data;
+  var data,level_headers,tag_labels,spig_fav,clearers,clears,raw_data,current_tag;
   var params=new URLSearchParams(window.location.search)
   var tags_list;
 
@@ -39,8 +39,8 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
     }
   }
 
-  if(params.get("dark")){
-    setDark(params.get("dark")==="1")
+  if(get_input("dark")){
+    setDark(get_input("dark")==="1")
   } 
   
   function makeDark(){
@@ -71,9 +71,8 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
     var played_headers=data.played.shift()
     clearers=[]
     clears={}
-    tag_labels=data.tags
+    tag_labels=data.tags;
     tags_list=[];
-    var current_tag=params.get("tag")
 
     var filtered_plays=[];
 
@@ -224,8 +223,6 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
         filtered_plays[i].unshift(i+1)
       }
     }
-    console.log(filtered_plays)
-    console.log(filtered_levels)
 
     var tempSelect="<option value=''>Default</option>"
 
@@ -305,6 +302,8 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
      },2000)
     copyClipboard(code)
   })
+  
+  $('.loader').hide();
   }
 function copyClipboard(str){
   const el = document.createElement('textarea');
@@ -318,6 +317,9 @@ function copyClipboard(str){
 
 
 
+  function save_input(query_name, obj){
+    localStorage.setItem(query_name, ($(obj).val()));
+  }
 
   function store_input(query_name,obj){
     if(params.get(query_name)){
@@ -361,6 +363,10 @@ function copyClipboard(str){
     $("#refresh").click(function(){
       getData()
     })
+
+    $('#submitButton').click(function(){
+      filterTable();
+    });
 
 
     $('#table').DataTable({
@@ -563,7 +569,9 @@ function copyClipboard(str){
 
 
 
-function getData(){
+function getData(){    
+    $('.loader').show();
+
     var datatable=$('#table').DataTable()
     var datatable2=$("#playedTable").DataTable()
     datatable.clear().draw();
@@ -578,11 +586,35 @@ function getData(){
   })
 }
 
+function filterTable(){
+    $('.loader').show();
+    console.log("starting to filter table");
+  
+    save_input('member','#registeredName')
+    save_input('cleared','#clearedLevel')
+    save_input('approved','#pendingLevel')
+    save_input('minDifficulty','#minDifficulty')
+    save_input('maxDifficulty','#maxDifficulty')
+    current_tag = $('#tagSelect').val();
+
+    setTimeout(function(){
+      var datatable=$('#table').DataTable()
+      var datatable2=$("#playedTable").DataTable()
+      datatable.clear().draw();
+      datatable2.clear().draw();
+      $("#playedTableCont").toggle(params.get("code")!=null)
+      refresh();
+      console.log("filter table done");
+    }, 100);    
+}
+
 getData()
   })
 </script>
 </head>
 <body class="dark">
+<div class="loader loader-spin" style="display:none;"></div>
+<div class="loader loader-bg" style="display:none;"></div>
 <div class="container">
   <div class="row header-row">
     <div class="col-12">
@@ -611,7 +643,7 @@ getData()
     </div>
   </div>
 
-<form>
+<div>
   <div class="form-group row">
     <div class="col-md-6">
     <label for="registeredName">Registered TeamShell Name</label>
@@ -663,12 +695,12 @@ getData()
     </div>
   
 
-    <div class="col-md-2"><label for="submitButton">&nbsp;</label><button type="submit" id="submitButton" class="btn btn-block btn-primary">Filter</button></div>
+    <div class="col-md-2"><label for="submitButton">&nbsp;</label><button id="submitButton" class="btn btn-block btn-primary">Filter</button></div>
   </div>
 
 
   
-</form>
+</div>
 <div class="btn btn-block btn-info"><div id="refresh" title='Get new data from the sheet. Useful if you just submitted a clear'>Refresh Data <i class="fa fa-refresh" aria-hidden="true"></i></div></div>
 
 <table id="table" class="compact row-border stripe hover" style="width:100%">
