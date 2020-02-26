@@ -588,7 +588,6 @@ function getData(){
 
 function filterTable(){
     $('.loader').show();
-    console.log("starting to filter table");
   
     save_input('member','#registeredName')
     save_input('cleared','#clearedLevel')
@@ -604,7 +603,6 @@ function filterTable(){
       datatable2.clear().draw();
       $("#playedTableCont").toggle(params.get("code")!=null)
       refresh();
-      console.log("filter table done");
     }, 100);    
 }
 
