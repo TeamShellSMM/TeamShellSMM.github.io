@@ -438,11 +438,11 @@ function copyClipboard(str){
             //{ "visible": false,  "targets": [ 3 ] }
     })
 
-
 function getData(){
     var datatable=$('#table').DataTable()
     datatable.clear().draw();
-    $.getJSON("https://script.google.com/macros/s/AKfycbwOZQzoqLRYbwSoTYWgJeT1A-YKfDKJf_2jqNBm5qmr_BncNL8/exec?callback=?").done(function(_data){
+    var devid=get_input("devid")
+    $.getJSON("https://script.google.com/macros/s/AKfycbwOZQzoqLRYbwSoTYWgJeT1A-YKfDKJf_2jqNBm5qmr_BncNL8/exec?callback=?&devid="+(devid?devid:"")).done(function(_data){
     raw_data=JSON.stringify(_data)
 
     refresh()
@@ -451,6 +451,17 @@ function getData(){
 
 getData()
   })
+
+//for testing purposes  
+function dev(id){
+  if(id){ 
+    localStorage.setItem("devid",id)
+    console.log('%c This site will now use the sheet with id '+id, 'background: #000; color: #f88501');
+  } else {
+    localStorage.removeItem("devid")
+    console.log('%c This site will now use the main sheet', 'background: #000; color: ##01a09e;');
+  }
+}
 </script>
 </head>
 <body class="dark">
