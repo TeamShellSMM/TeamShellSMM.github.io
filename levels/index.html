@@ -433,7 +433,6 @@ function copyClipboard(str){
                       videos+="<a target='_blank' data-toggle='tooltip' title='Video clear' href='"+raw_vids[j]+"'><i class='fa fa-video-camera' aria-hidden='true'></i></a> "
                     }
                   } 
-                  //row[7]?"<a target='_blank' data-toggle='tooltip' title='Video clear' href='"+row[7]+"'><i class='fa fa-video-camera' aria-hidden='true'></i></a>" :""
                   var tags=row[9]
                   tags=tags?tags.split(","):[]
                   for(var i=0;i<tags.length;i++){
@@ -448,7 +447,13 @@ function copyClipboard(str){
             },
             {
                 "render": function ( data, type, row ) {
-                    return Number(data).toFixed(1);
+                    var tags=row[9]
+                    tags=tags?tags.split(","):[]
+                    if(tags.indexOf("TeamConsistency")!=-1){
+                      return "N/A";
+                    } else {
+                      return Number(data).toFixed(1);  
+                    }
                 },
                 targets:4,
             },
