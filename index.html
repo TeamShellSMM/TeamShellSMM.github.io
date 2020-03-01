@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>#TeamShell Levels</title>
+<title>#TeamShell</title>
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
@@ -18,7 +18,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js" rel="stylesheet">
-<link href="assets/teamshell.css?v=1.0.2" rel="stylesheet">
+<link href="assets/teamshell.css?v=1.0.5" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
@@ -26,12 +26,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.js"></script>
 <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
-
-<!--
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
--->
 <script>
 
   var data,level_headers,tag_labels,spig_fav,clearers,clears,raw_data;
@@ -75,6 +69,18 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
   }
 
   function refresh(){
+    var dashboardData={
+      "numApproved":0,
+      "numPending":0,
+      "numMembers":0,
+      "numUnofficialMembers":0,
+      "numClears":0,
+      "numVotes":0,
+      "numLikes":0,
+      "numConsistency":0
+  }
+
+
     data=JSON.parse(raw_data)
     var level_headers=data.levels.shift()
     var played_headers=data.played.shift()
@@ -82,14 +88,9 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
     clears={}
     tag_labels=data.tags
     tags_list=[];
-    var current_tag=params.get("tag")
 
-    var filtered_plays=[];
 
     for(var i=0;i<data.played.length;i++){
-      if(params.get("code")==data.played[i][0]){
-        filtered_plays.push(data.played[i])
-      }
       if(clearers.indexOf(data.played[i][1])==-1){ //getting all the people who have submitted clears
         clearers.push(data.played[i][1])
       }
@@ -101,255 +102,77 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
       } 
     }
 
-
-
-  $('#registeredName').typeahead({source: clearers}); 
-
     var filtered_levels=[];
 
     for(var i=0;i<data.levels.length;i++){ //main loop that processes all the stats for the levels
       data.levels[i].unshift(i+1) //adds the id.
-
-      //internal variables
-      var tsclears=0;
-      var votesum=0;
-      var votetotal=0;
-      var likes=0;
 
       //data definition
       var current_level=data.levels[i][1];
       var current_creator=data.levels[i][2];
 
 
-
-
       if(clears[current_level]){
         for(var player in clears[current_level]){
           if(clears[current_level][player].cleared=="1" && player!=current_creator){
-            tsclears++;
+            dashboardData.numClears++
           }
           if(clears[current_level][player].vote){
-            votetotal++;
-            votesum+=Number(clears[current_level][player].vote)
+            dashboardData.numVotes++
           }
           if(clears[current_level][player].liked){
-            likes++;
+            dashboardData.numLikes++
           }
 
         }
       }
-
-
-      data.levels[i].push(tsclears) //no. of clears
-      data.levels[i].push(votetotal>0? ((votesum/votetotal).toFixed(1))+","+votetotal:"0,0") //avg vote, num votes
-      data.levels[i].push(likes) //liked
-      if(clears[current_level] && clears[current_level][get_input("member")]){ //if this clear is made by the current entered user
-          data.levels[i].push(clears[current_level][get_input("member")].cleared)
-          data.levels[i].push(clears[current_level][get_input("member")].vote)
-          data.levels[i].push(clears[current_level][get_input("member")].liked)
-      } else {
-        data.levels[i].push("-")
-        data.levels[i].push("-")  
-        data.levels[i].push("-")
-      }
-
-
-      //adding automatic tags
-      var curr_tags=data.levels[i][9].split(",")
-      if(data.levels[i][5]=="0"){
-        curr_tags.unshift("Pending")
-      }
-      data.levels[i][9]=curr_tags.join(",")
-
-
+     
       var include=true;
-
-
       //get all the tags used from the data set
+      var curr_tags=data.levels[i][9].split(",")      
       for(var k=0;k<curr_tags.length;k++){
-        if(curr_tags[k] && tags_list.indexOf(curr_tags[k])=="-1")
-          tags_list.push(curr_tags[k])
-      }
-
-
-
-      if(current_tag){ //if a tag is selected
-        //if the level doen't have the current tag, don't include
-        if(curr_tags.indexOf(current_tag)=="-1"){
-          include=false
-        }
-      } else { //default view. default view doesn't select certain tags like TeamConsistency
-        for(var k=0;k<curr_tags.length;k++){
-          if(data.seperate.indexOf(curr_tags[k])!="-1"){
-            include=false
-          }
-        }
-      }
-
-
-
-      if(params.get("creator")){
-        if(data.levels[i][headers.levels.Creator]!=params.get("creator")){
+        if(data.seperate.indexOf(curr_tags[k])!=-1){
           include=false
         }
       }
 
-      if(get_input("minDifficulty")){
-        if(parseFloat(data.levels[i][headers.levels.Difficulty])<parseFloat(get_input("minDifficulty"))){
-          include=false
-        }
-      }
-      if(get_input("maxDifficulty")){
-        if(parseFloat(data.levels[i][headers.levels.Difficulty])>parseFloat(get_input("maxDifficulty"))){
-          include=false
-        }
+      if(data.levels[i][5]=="0"){
+        dashboardData.numPending++
       }
 
-      if(params.get("code")){
-        if(data.levels[i][headers.levels.Code]!=params.get("code")){
-          include=false
-        } else {
-          var current_creator=data.levels[i][headers.levels.Creator];
-          var to_remove=[]
-          for(var j=0;j<filtered_plays.length;j++){
-            if(filtered_plays[j][1]==current_creator){
-              to_remove.push(j)
-            }
-          }
-          for(var j=to_remove.length-1;j>=0;j--){
-            console.log(filtered_plays.splice(j,1))
-          }
-        }
+      if(include && data.levels[i][5]=="1"){
+        dashboardData.numApproved++;
       }
 
-      if(include){
+      if(!include && data.levels[i][5]=="1"){
+        dashboardData.numConsistency++;
+      }
+
+      if(include && data.levels[i][5]=="1"){
         filtered_levels.push(data.levels[i])  
       }
-
       
-    } //end main level loops
-    if(filtered_plays){
-    for(var i=0;i<filtered_plays.length;i++){
-        filtered_plays[i].unshift(i+1)
-      }
     }
-    console.log(filtered_plays)
     console.log(filtered_levels)
 
-    var tempSelect="<option value=''>Default</option>"
-
-
-    //Removing these to put them at the beginning
-    var removeIndexes = [];
-    var removeTags = ["SMB1", "SMB3", "SMW", "NSMBU", "3DW"];
-    for(var i = 0; i < tags_list.length; i++){
-      if(removeTags.indexOf(tags_list[i].toUpperCase()) !== -1){
-        removeIndexes.push(i);
+     for(var i=0;i<data.members.length;i++){
+      if(data.members[i][2]=="1"){
+        dashboardData.numMembers++
+      } else {
+        dashboardData.numUnofficialMembers++
       }
     }
 
-    //Reversing to make splicing simpler
-    removeIndexes = removeIndexes.reverse();
-    for(var i = 0; i < removeIndexes.length; i++){
-      tags_list.splice(removeIndexes[i], 1);
+
+    for(var i in dashboardData){
+      console.log(dashboardData[i])
+      $("#"+i).html(dashboardData[i])  
     }
 
-    //Removing duplicates
-    tags_list = removeDups(tags_list);
-
-    //Sorting tags by Alphabet
-    tags_list.sort();
-
-    //Adding Game Types to the beginning
-    tags_list.unshift("SMB1", "SMB3", "SMW", "NSMBU", "3DW");
-
-    for(var k=0;k<tags_list.length;k++){
-      tempSelect+="<option "+ (current_tag==tags_list[k]?"selected":"")+">"+tags_list[k]+"</option>"
-    }
-    $("#tagSelect").html(tempSelect)
-    var datatable=$('#table').DataTable()
-    datatable.clear();
-    datatable.rows.add(filtered_levels)
-
-    if(filtered_plays){
-      var datatable2=$('#playedTable').DataTable()
-      datatable2.clear();
-      datatable2.rows.add(filtered_plays)
-      datatable2.draw();
-    }
-    //
-    if(!get_input('approved') || get_input('approved')=="1"||get_input('approved')=="2"){
-      datatable.column(5).search( (get_input('approved')=="2"?'"0"':'"1"'),false,true)  
-    } else {
-      datatable.column(5).search( "",false,true)  
-    }
-
-    if(get_input("cleared")=="2"||get_input("cleared")=="3"){
-      datatable.column(14).search(get_input('cleared')=="3"?'"1"':'"0"',false,true)  
-    }
     
-
-    datatable.draw();
-    $('[data-toggle="tooltip"],.copy,#refresh,#submitButton').tooltip()
-    $('.copy').click(function(){
-     var code=$(this).parent().text().substring(0,11);
-     var old_title="Copy tsclear code"
-     var new_title="Code copied."
-     
-     $(this).addClass("text-success")
-      $(this).tooltip('hide')
-          .attr('title', new_title)
-          .attr('data-original-title', new_title)
-          .tooltip('update')
-          .tooltip('show')
-      var temp=this
-     
-     setTimeout(function(){
-      $(temp).removeClass("text-success")
-       $(temp).tooltip('hide')
-          .attr('title', old_title)
-          .attr('data-original-title', old_title)
-          .tooltip('update')
-          .tooltip('enable')
-     },2000)
-    copyClipboard(code)
-  })
-
-   $('.copyLike').click(function(){
-     var code=$(this).parent().text().substring(0,11);
-     var old_title="Copy tsclear code with like"
-     var new_title="Code copied."
-     
-     $(this).addClass("text-success")
-      $(this).tooltip('hide')
-          .attr('title', new_title)
-          .attr('data-original-title', new_title)
-          .tooltip('update')
-          .tooltip('show')
-      var temp=this
-     
-     setTimeout(function(){
-      $(temp).removeClass("text-success")
-       $(temp).tooltip('hide')
-          .attr('title', old_title)
-          .attr('data-original-title', old_title)
-          .tooltip('update')
-          .tooltip('enable')
-     },2000)
-    copyClipboard(code+" like")
-  })
+  
+   //end main level loops
   }
-function copyClipboard(str){
-  const el = document.createElement('textarea');
-  el.value = "!tsclear "+str;
-  document.body.appendChild(el);
-  el.select();
-  document.execCommand('copy');
-  document.body.removeChild(el);
-
-}
-
-
 
 
   function store_input(query_name,obj){
@@ -384,233 +207,14 @@ function copyClipboard(str){
 
 
 
-    store_input('member','#registeredName')
-    store_input('cleared','#clearedLevel')
-    store_input('approved','#pendingLevel')
-    store_input('minDifficulty','#minDifficulty')
-    store_input('maxDifficulty','#maxDifficulty')
-
-
-    $("#refresh").click(function(){
-      getData()
-    })
-
-
-    $('#table').DataTable({
-      "language": {
-      "emptyTable": "Data is loading. You may have to whitelist this site for browser extensions that block third party scripts",
-      "info":           "_TOTAL_ levels",
-      "infoEmpty":      "0 levels",
-      "infoFiltered":   "/ _MAX_ levels",
-      },
-      paging:false,
-      responsive:true,
-      dom : "iti",
-      "columnDefs": [{
-            "render": function ( data, type, row ) {
-                    return "<span class='text-monospace'><a href='?code="+encodeURI(data)+"'>"+data+"</a></span> <span class='copy' title='Copy tsclear code'><i class='fa fa-clipboard' aria-hidden='true'></i></span> <span class='copyLike' title='Copy tsclear code with like' data-toggle='tooltip'><i class='fa fa-heart text-danger' aria-hidden='true'></i></span>"
-                },
-                "orderable": false,
-                targets:1,
-            },{
-            "render": function ( data, type, row ) {
-                    return "<a class='creator_name' href='?creator="+encodeURI(data)+"'>"+data+"</a>"
-                },
-                "orderable": false,
-                targets:2,
-            },
-            {
-                "render": function ( data, type, row ) {
-                  if(type!="display") return data
-
-                  var videos="";
-
-                  if(row[7]){
-                    var raw_vids=row[7].split(",")
-                    for(var j=0;j<raw_vids.length;j++){
-                      videos+="<a target='_blank' data-toggle='tooltip' title='Video clear' href='"+raw_vids[j]+"'><i class='fa fa-video-camera' aria-hidden='true'></i></a> "
-                    }
-                  } 
-                  //row[7]?"<a target='_blank' data-toggle='tooltip' title='Video clear' href='"+row[7]+"'><i class='fa fa-video-camera' aria-hidden='true'></i></a>" :""
-                  var tags=row[9]
-                  tags=tags?tags.split(","):[]
-                  for(var i=0;i<tags.length;i++){
-                    var type=tag_labels[tags[i]]?tag_labels[tags[i]]:"secondary"
-                    tags[i]='<a href="?tag='+tags[i]+'"><span class="tag badge badge-pill badge-'+type+'">'+tags[i]+"</span></a>"
-                  }
-                  tags=tags.join("")
-
-                  return "<span class='font-weight-bold'>"+data+"</span><br/>"+videos+" "+tags;
-                },
-                targets:3,
-            },
-            {
-                "render": function ( data, type, row ) {
-                    return Number(data).toFixed(1);
-                },
-                targets:4,
-            },
-            {
-                
-                visible: false,
-                targets:[5,6,7,8,9,10]
-            }, /*
-            {
-                "render": function ( data, type, row ) {
-                    data=data?data:1569790971; //first registered date as placeholder
-                    data=data*1000
-                     if ( type === "sort" || type === 'type' ) {
-                        return data;
-                    } else {
-                        return moment(moment.utc(data)).local().format('ll')   
-                    }
-                    
-                },
-                targets:8
-            },*/ {
-                "render": function ( data, type, row ) {
-                    data=data.split(",")
-                     if ( type !="display" ) {
-                        return data[0];
-                    } else {  
-                        return data[0]+"<br/><span class='tag badge badge-secondary'>"+data[1]+" votes</span>";
-                    }
-                    
-                },
-                targets:12
-            },{
-                "render": function ( data, type, row ) {
-                     if ( type !="display" ) {
-                        return data=="1"?"1":"0";
-                    } else {
-                        return (data=="1"?'<i title="Entered player has cleared this level." data-toggle="tooltip" class="fa fa-check text-success" aria-hidden="true"></i>': "");
-                    }
-                    
-                },
-                targets:14
-            },{
-                "render": function ( data, type, row ) {
-                    return isNaN(data)||data==0?"":Number(data).toFixed(1);
-                },
-                targets:15
-            },{
-                "render": function ( data, type, row ) {
-                     if ( type !="display" ) {
-                        return data=="1"?"1":"0";
-                    } else {
-                        return (data=="1"?'<i title="Player has liked this level" data-toggle="tooltip" class="fa fa-heart text-danger" aria-hidden="true"></i>': "");
-                    }
-                    
-                },
-                targets:16
-            },
-             {
-                defaultContent:"",
-                targets:[6,7,8,9,10,11,12,13,14,15,16]
-            },
-            //{ "visible": false,  "targets": [ 3 ] }
-        ]
-    })
-
-
- $('#playedTable').DataTable({
-      "language": {
-      "emptyTable": "Data is loading. You may have to whitelist this site for browser extensions that block third party scripts",
-      "info":           "_TOTAL_ players",
-      "infoEmpty":      "0 rows",
-      "infoFiltered":   "/ _MAX_ rows",
-      },
-      paging:false,
-      responsive:true,
-      dom : "iti",
-       "columnDefs": [
-        {
-                visible: false,
-                targets:[1]
-            },{
-                "render": function ( data, type, row ) {
-                     if ( type !="display" ) {
-                        return data=="1"?"1":"0";
-                    } else {
-                        return (data=="1"?'<i title="Player has cleared this level." data-toggle="tooltip" class="fa fa-check text-success" aria-hidden="true"></i>': "");
-                    }
-                    
-                },
-                targets:3
-            },{
-                "render": function ( data, type, row ) {
-                     if ( type !="display" ) {
-                        return data=="1"?"1":"0";
-                    } else {
-                        return (data=="1"?'<i title="This is a Shellder Clear" data-toggle="tooltip" class="fa fa-check text-success" aria-hidden="true"></i>': "");
-                    }
-                    
-                },
-                targets:4
-            },{
-                "render": function ( data, type, row ) {
-                     if ( type !="display" ) {
-                        return data=="1"?"1":"0";
-                    } else {
-                        return (data=="1"?'<i title="This is a Shellder Clear" data-toggle="tooltip" class="fa fa-check text-success" aria-hidden="true"></i>': "");
-                    }
-                    
-                },
-                targets:4
-            },{
-                "render": function ( data, type, row ) {
-                     if ( type !="display" ) {
-                        return data=="1"?"1":"0";
-                    } else {
-                        return (data=="1"?'<i title="Player has liked this level" data-toggle="tooltip" class="fa fa-heart text-danger" aria-hidden="true"></i>': "");
-                    }
-                    
-                },
-                targets:5
-            },{
-                "render": function ( data, type, row ) {
-                     if ( type !="display" ) {
-                        return data
-                    } else {
-                        return data?parseFloat(data).toFixed(1):""
-                    }
-                    
-                },
-                targets:6
-            },{
-                "render": function ( data, type, row ) {
-                     if ( type !="display" ) {
-                        return data
-                    } else {
-                        var day=moment.unix(data)
-                        return day.fromNow()
-                    }
-                    
-                },
-                targets:7
-            }
-          
-      ]
-    })
-
-
-
 function getData(){
-    var datatable=$('#table').DataTable()
-    var datatable2=$("#playedTable").DataTable()
-    datatable.clear().draw();
-    datatable2.clear().draw();
-    $("#playedTableCont").toggle(params.get("code")!=null)
     $.getJSON("https://script.google.com/macros/s/AKfycbwOZQzoqLRYbwSoTYWgJeT1A-YKfDKJf_2jqNBm5qmr_BncNL8/exec?callback=?").done(function(_data){
     raw_data=JSON.stringify(_data)
-
     refresh()
-
-  
   })
 }
 
-//getData()
+getData()
   })
 </script>
 </head>
@@ -621,7 +225,7 @@ function getData(){
       <h1><img src="assets/buzzySpin.gif"/> <span class="green">#Team</span><span class="orange">Shell</span> Levels</h1>
       <ul id="nav"><li class="active"><a href="levels">Levels</a></li><li><a href="makers">Makers</a></li><li><a href="members">Members</a></li></ul>
       <h4>Join the discord for more information: <a href="https://discord.gg/7tQJewa">https://discord.gg/7tQJewa</a></h4>
-      <h4>We have a twitter now! <a href="https://twitter.com/TeamShellSMM">https://twitter.com/TeamShellSMM</a></h4>
+      
       <div class="form-check">
         <input class="form-check-input" type="checkbox" value="" id="darkmode">
         <label class="form-check-label" for="darkmode">Dark Mode <i class="fa fa-moon-o" aria-hidden="true"></i></label>
@@ -641,6 +245,30 @@ function getData(){
           </div>
         </div>
       </div>
+    </div>
+  </div>
+  <style>
+    .dashboard td {font-size:1.2em;padding:0.5em;}
+  </style>
+  <div class="row">
+    <div class="col-md-6">
+      <table class="dashboard">
+        <tr><td>Official Levels</td><td id="numApproved">Loading</td></tr>
+        <tr><td>Pending Levels</td><td id="numPending">Loading</td></tr>
+        <tr><td>Members</td><td id="numMembers">Loading</td></tr>
+        <tr><td>Unoffical Members</td><td id="numUnofficialMembers">Loading</td></tr>
+        <tr><td>Clears</td><td id="numClears">Loading</td></tr>
+        <tr><td>Votes</td><td id="numVotes">Loading</td></tr>
+        <tr><td>Likes</td><td id="numLikes">Loading</td></tr>
+        <tr><td>TeamConsistency Levels</td><td id="numConsistency">Loading</td></tr>
+        <tr><td>Shell Jamps Done</td><td>A Lot</td></tr>
+      </table>
+    </div>
+    <div class="col-md-4">
+      <h4>We have a twitter now! <a href="https://twitter.com/TeamShellSMM">https://twitter.com/TeamShellSMM</a></h4>
+      <div class="embed-responsive-item">
+      <a class="twitter-timeline" data-theme="dark" href="https://twitter.com/TeamShellSMM?ref_src=twsrc%5Etfw">Tweets by TeamShellSMM</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
     </div>
   </div>
 </div>
