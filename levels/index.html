@@ -29,7 +29,7 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
   var params=new URLSearchParams(window.location.search)
   var tags_list;
 
-
+//dark mode functions
   function setDark(val){
     console.log(val)
     if(val){
@@ -46,6 +46,14 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
   function makeDark(){
       document.getElementsByTagName("html")[0].className=localStorage.getItem("dark")==="1"?"dark":""
   }
+  makeDark()
+
+  $(function(){
+    $("#darkmode").change(function(){
+      setDark($(this).prop("checked"))
+      makeDark()
+    }).prop("checked",localStorage.getItem("dark"))
+  })
 
   function removeDups(names) {
     let unique = {};
@@ -57,7 +65,7 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
     return Object.keys(unique);
   }
 
-  makeDark()
+  
 
 
   var headers={
@@ -111,8 +119,6 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
       var current_creator=data.levels[i][2];
 
 
-
-
       if(clears[current_level]){
         for(var player in clears[current_level]){
           if(clears[current_level][player].cleared=="1" && player!=current_creator){
@@ -133,7 +139,11 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
       data.levels[i].push(tsclears) //no. of clears
       data.levels[i].push(votetotal>0? ((votesum/votetotal).toFixed(1))+","+votetotal:"0,0") //avg vote, num votes
       data.levels[i].push(likes) //liked
-      if(clears[current_level] && clears[current_level][get_input("member")]){ //if this clear is made by the current entered user
+      if(current_creator==get_input("member")){
+          data.levels[i].push("1")
+          data.levels[i].push("-")
+          data.levels[i].push("-")
+      } else if(clears[current_level] && clears[current_level][get_input("member")]){ //if this clear is made by the current entered user
           data.levels[i].push(clears[current_level][get_input("member")].cleared)
           data.levels[i].push(clears[current_level][get_input("member")].vote)
           data.levels[i].push(clears[current_level][get_input("member")].liked)
@@ -372,13 +382,6 @@ function copyClipboard(str){
 
   $(function(){
 
-    $("#darkmode").change(function(){
-      setDark($(this).prop("checked"))
-      makeDark()
-    }).prop("checked",localStorage.getItem("dark"))
-
-
-
     store_input('member','#registeredName')
     store_input('cleared','#clearedLevel')
     store_input('approved','#pendingLevel')
@@ -413,9 +416,9 @@ function copyClipboard(str){
                 targets:1,
             },{
             "render": function ( data, type, row ) {
+                    if(type!="display") return data
                     return "<a class='creator_name' href='?creator="+encodeURI(data)+"'>"+data+"</a>"
                 },
-                "orderable": false,
                 targets:2,
             },
             {
