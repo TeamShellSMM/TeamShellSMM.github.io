@@ -168,12 +168,14 @@ function get_maker_points(likes, clears, difficultyPoints){
     }
 
     for(var i=0;i<data.played.length;i++){
-      if(levels[data.played[i][0]]){
+      var current_level=data.played[i][0]
+      var current_creator=data.played[i][1]
+      if(levels[current_level] && levels[current_level].creator!=current_creator){
         if(data.played[i][4] == "1"){
-          levels[data.played[i][0]]["likes"] = levels[data.played[i][0]]["likes"] ? levels[data.played[i][0]]["likes"] + 1 : 1;
+          levels[current_level]["likes"] = levels[current_level]["likes"] ? levels[current_level]["likes"] + 1 : 1;
         }
         if(data.played[i][2] == "1"){
-          levels[data.played[i][0]]["clears"] = levels[data.played[i][0]]["clears"] ? levels[data.played[i][0]]["clears"] + 1 : 1;
+          levels[current_level]["clears"] = levels[current_level]["clears"] ? levels[current_level]["clears"] + 1 : 1;
         }        
       }
     }

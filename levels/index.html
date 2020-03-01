@@ -121,17 +121,18 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
 
       if(clears[current_level]){
         for(var player in clears[current_level]){
-          if(clears[current_level][player].cleared=="1" && player!=current_creator){
-            tsclears++;
+          if(player!=current_creator){
+            if(clears[current_level][player].cleared=="1"){
+              tsclears++;
+            }
+            if(clears[current_level][player].vote){
+              votetotal++;
+              votesum+=Number(clears[current_level][player].vote)
+            }
+            if(clears[current_level][player].liked){
+              likes++;
+            }
           }
-          if(clears[current_level][player].vote){
-            votetotal++;
-            votesum+=Number(clears[current_level][player].vote)
-          }
-          if(clears[current_level][player].liked){
-            likes++;
-          }
-
         }
       }
 
