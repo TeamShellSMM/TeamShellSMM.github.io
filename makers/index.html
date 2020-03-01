@@ -375,25 +375,26 @@ function copyClipboard(str){
       "columnDefs": [
          {
             "render": function ( data, type, row ) {
+                    if(type!="display") return data
                     return "<div class='points'>"+data+"</div>"
                 },
-                //"orderable": false,
                 targets:7,
             },
             {
             "render": function ( data, type, row ) {
                     return data+"%"
                 },
-                //"orderable": false,
                 targets:6,
             },
             { "render": function ( data, type, row ) {
+                    if(type!="display") return data
                     let goldsHtml = "";
                     let silversHtml = "";
                     let bronzesHtml = "";
                     let ironsHtml = "";
 
                     for(var i = 0; i < comp_winners.length; i++){
+                      //return "<div class='points'><a href='../levels/?creator="+encodeURI(data)+"' target='_blank'>"+data+"</a></div>"
                       if(data == comp_winners[i][1]){
                         switch(comp_winners[i][3]){
                           case "1":
@@ -426,7 +427,7 @@ function copyClipboard(str){
                       medalsHtml += '<div class="medals">' + ironsHtml + '</div>';
                     }  
 
-                    return data + medalsHtml;
+                    return "<a href='../levels/?creator="+encodeURI(data)+"' target='_blank'>"+data + "</a>"+medalsHtml;
                 },
                 targets: 0
             },

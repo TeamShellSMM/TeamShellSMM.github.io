@@ -319,7 +319,13 @@ function copyClipboard(str){
                 },
                 //"orderable": false,
                 targets:6,
-            }, 
+            },  {
+            "render": function ( data, type, row ) {
+                    if(type!="display") return data
+                    return "<a href='../levels?creator="+encodeURI(data)+"' target='_blank'>"+data+"</a></div>"
+                },
+                targets:1,
+            },
             {
                 
                 visible: false,
