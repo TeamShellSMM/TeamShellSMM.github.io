@@ -12,7 +12,6 @@
 <meta name="msapplication-TileColor" content="#01a19f">
 <meta name="msapplication-config" content="/assets/browserconfig.xml">
 <meta name="theme-color" content="#01a19f">
-
 <link href="https://fonts.googleapis.com/css?family=Bangers&display=swap" rel="stylesheet">
 <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
@@ -21,6 +20,7 @@
 <link href="assets/teamshell.css?v=1.0.5" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.js"></script>
@@ -78,6 +78,16 @@
       "numVotes":0,
       "numLikes":0,
       "numConsistency":0
+  }
+
+
+  var all_difficulty=["0.1"]
+  var difficulty_no={
+    "0.1":0
+  }
+  for(var i=0.5 ;i<=12;i+=0.5){
+    all_difficulty.push(i.toString())
+    difficulty_no[i.toString()]=0
   }
 
 
@@ -141,6 +151,7 @@
       }
 
       if(include && data.levels[i][5]=="1"){
+        difficulty_no[data.levels[i][4]]++
         dashboardData.numApproved++;
       }
 
@@ -168,8 +179,54 @@
       console.log(dashboardData[i])
       $("#"+i).html(dashboardData[i])  
     }
+    console.log(all_difficulty)
+    console.log(difficulty_no)
+    var difficulty_no_data=[]
+    for(var i=0;i<all_difficulty.length;i++){
+      difficulty_no_data.push(difficulty_no[all_difficulty[i]])
+    }
 
     
+    var ctx = document.getElementById('difficulty_chart');
+    var myChart = new Chart(ctx, {
+        type: 'horizontalBar',
+        responsive:true,
+        maintainAspectRatio: false,
+        data: {
+            labels: all_difficulty,
+            datasets: [{
+                //barThickness:20,
+                label: '# of levels with stated difficulty',
+                data: difficulty_no_data,
+                /* backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ], */
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
   
    //end main level loops
   }
@@ -217,6 +274,7 @@ function getData(){
 getData()
   })
 </script>
+
 </head>
 <body class="dark">
 <div class="container">
@@ -263,6 +321,10 @@ getData()
         <tr><td>TeamConsistency Levels</td><td id="numConsistency">Loading</td></tr>
         <tr><td>Shell Jamps Done</td><td>A Lot</td></tr>
       </table>
+      <h4>Levels by difficulty</h4>
+      <div class="chart-container" style="position: relative;width:100%;">
+      <canvas id="difficulty_chart"></canvas>
+      </div>
     </div>
     <div class="col-md-4">
       <h4>We have a twitter now! <a href="https://twitter.com/TeamShellSMM">https://twitter.com/TeamShellSMM</a></h4>
