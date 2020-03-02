@@ -182,8 +182,10 @@
     console.log(all_difficulty)
     console.log(difficulty_no)
     var difficulty_no_data=[]
+    var backgroundColor=[]
     for(var i=0;i<all_difficulty.length;i++){
       difficulty_no_data.push(difficulty_no[all_difficulty[i]])
+      backgroundColor.push('rgba(248,133 , 1, 1)')
     }
 
     
@@ -198,6 +200,7 @@
                 //barThickness:20,
                 label: '# of levels with stated difficulty',
                 data: difficulty_no_data,
+                backgroundColor:backgroundColor,
                 /* backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
                     'rgba(54, 162, 235, 0.2)',
