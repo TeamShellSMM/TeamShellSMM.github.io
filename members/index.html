@@ -27,6 +27,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
 
 <script>
 function ObjectLength_Modern( object ) {
@@ -349,12 +350,26 @@ function copyClipboard(str){
 function getData(){
     var datatable=$('#table').DataTable()
     datatable.clear().draw();
+    
+    var lastLoaded='';
+    if(raw_data=localStorage.getItem("cachedData")){
+      _data=JSON.parse(raw_data)
+      lastLoaded=_data.lastUpdated
+    }
     var devid=get_input("devid")
-    $.getJSON("https://script.google.com/macros/s/AKfycbwOZQzoqLRYbwSoTYWgJeT1A-YKfDKJf_2jqNBm5qmr_BncNL8/exec?callback=?&devid="+(devid?devid:"")).done(function(_data){
-    raw_data=JSON.stringify(_data)
-
-    refresh()
-  })
+    var url="https://script.google.com/macros/s/AKfycbwOZQzoqLRYbwSoTYWgJeT1A-YKfDKJf_2jqNBm5qmr_BncNL8/exec?callback=?&lastLoaded="+lastLoaded+("&devid="+(devid?devid:""))
+    $.getJSON(url).done(function(_data){
+    if(_data=="No Updated Needed"){
+      $.notify("No new data was loaded",{
+        className:"success",
+        position:"top right",
+      });
+    } else {
+      raw_data=JSON.stringify(_data)
+      localStorage.setItem("cachedData",raw_data)
+    }
+    refresh()  
+    })
 }
 
 getData()
