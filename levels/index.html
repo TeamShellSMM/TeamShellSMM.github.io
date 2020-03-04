@@ -27,57 +27,11 @@
 <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
-
-<!--
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
--->
+<script src="../assets/script.js?v=0.0.1"></script>
 <script>
 
-  var data,level_headers,tag_labels,spig_fav,clearers,clears,raw_data,current_tag;
-  var params=new URLSearchParams(window.location.search)
+  var raw_data,data,level_headers,tag_labels,spig_fav,clearers,clears,current_tag;
   var tags_list;
-
-//dark mode functions
-  function setDark(val){
-    console.log(val)
-    if(val){
-      localStorage.setItem("dark","1")
-    } else {
-      localStorage.removeItem("dark")
-    }
-  }
-
-  if(get_input("dark")){
-    setDark(get_input("dark")==="1")
-  } 
-  
-  function makeDark(){
-      document.getElementsByTagName("html")[0].className=localStorage.getItem("dark")==="1"?"dark":""
-  }
-  makeDark()
-
-  $(function(){
-    $("#darkmode").change(function(){
-      setDark($(this).prop("checked"))
-      makeDark()
-    }).prop("checked",localStorage.getItem("dark"))
-  })
-
-  function removeDups(names) {
-    let unique = {};
-    names.forEach(function(i) {
-      if(!unique[i]) {
-        unique[i] = true;
-      }
-    });
-    return Object.keys(unique);
-  }
-
-  
-
-
   var headers={
     played:{"Code":0,"Player":1,"Completed":2,"Shelder":3,"Liked":4,"DifficultyVote":5,"Timestamp":6},
     levels:{"No":0,"Code":1,"Creator":2,"LevelName":3,"Difficulty":4,"LevelStatus":5,"NewCode":6,"ClearVideo":7,"Timestamp":8,"Tags":9} //the no. is added in the code itslef.
@@ -93,7 +47,6 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
     tags_list=[];
 
     var filtered_plays=[];
-
     for(var i=0;i<data.played.length;i++){
       if(params.get("code")==data.played[i][0]){
         filtered_plays.push(data.played[i])
@@ -166,78 +119,71 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
 
 
       //adding automatic tags
-      var curr_tags=data.levels[i][9].split(",")
-      if(data.levels[i][5]=="0"){
-        curr_tags.unshift("Pending")
-      }
-      data.levels[i][9]=curr_tags.join(",")
-
 
       var include=true;
-
-
-      //get all the tags used from the data set
-      for(var k=0;k<curr_tags.length;k++){
-        if(curr_tags[k] && tags_list.indexOf(curr_tags[k])=="-1")
-          tags_list.push(curr_tags[k])
-      }
-
-
-
-      if(current_tag){ //if a tag is selected
-        //if the level doen't have the current tag, don't include
-        if(curr_tags.indexOf(current_tag)=="-1"){
-          include=false
-        }
-      } else { //default view. default view doesn't select certain tags like TeamConsistency
-        for(var k=0;k<curr_tags.length;k++){
-          if(data.seperate.indexOf(curr_tags[k])!="-1"){
+      if(params.get("code")){
+          if(data.levels[i][headers.levels.Code]!=params.get("code")){
             include=false
+          } else {
+            var current_creator=data.levels[i][headers.levels.Creator];
+            var to_remove=[]
+            for(var j=0;j<filtered_plays.length;j++){
+              if(filtered_plays[j][1]==current_creator){
+                to_remove.push(j)
+              }
+            }
+            for(var j=to_remove.length-1;j>=0;j--){
+              console.log(filtered_plays.splice(j,1))
+            }
           }
-        }
-      }
-
-
-
-      if(params.get("creator")){
+      } else if(params.get("creator")){
         if(data.levels[i][headers.levels.Creator]!=params.get("creator")){
           include=false
         }
-      }
+      } else { //only run filters when not showing code or creators
 
-      if(get_input("minDifficulty")){
-        if(parseFloat(data.levels[i][headers.levels.Difficulty])<parseFloat(get_input("minDifficulty"))){
-          include=false
+        var curr_tags=data.levels[i][9].split(",")
+        if(data.levels[i][5]=="0"){
+          curr_tags.unshift("Pending")
         }
-      }
-      if(get_input("maxDifficulty")){
-        if(parseFloat(data.levels[i][headers.levels.Difficulty])>parseFloat(get_input("maxDifficulty"))){
-          include=false
-        }
-      }
+        data.levels[i][9]=curr_tags.join(",")
 
-      if(params.get("code")){
-        if(data.levels[i][headers.levels.Code]!=params.get("code")){
-          include=false
-        } else {
-          var current_creator=data.levels[i][headers.levels.Creator];
-          var to_remove=[]
-          for(var j=0;j<filtered_plays.length;j++){
-            if(filtered_plays[j][1]==current_creator){
-              to_remove.push(j)
+        //get all the tags used from the data set
+        for(var k=0;k<curr_tags.length;k++){
+          if(curr_tags[k] && tags_list.indexOf(curr_tags[k])=="-1")
+            tags_list.push(curr_tags[k])
+        }
+
+        if(current_tag){ //if a tag is selected
+          //if the level doen't have the current tag, don't include
+          if(curr_tags.indexOf(current_tag)=="-1"){
+            include=false
+          }
+        } else { //default view. default view doesn't select certain tags like TeamConsistency
+          for(var k=0;k<curr_tags.length;k++){
+            if(data.seperate.indexOf(curr_tags[k])!="-1"){
+              include=false
             }
           }
-          for(var j=to_remove.length-1;j>=0;j--){
-            console.log(filtered_plays.splice(j,1))
+        }
+
+        if(get_input("minDifficulty")){
+          if(parseFloat(data.levels[i][headers.levels.Difficulty])<parseFloat(get_input("minDifficulty"))){
+            include=false
           }
         }
-      }
+        if(get_input("maxDifficulty")){
+          if(parseFloat(data.levels[i][headers.levels.Difficulty])>parseFloat(get_input("maxDifficulty"))){
+            include=false
+          }
+        }
+
+      } //end if code else creater else
 
       if(include){
         filtered_levels.push(data.levels[i])  
       }
 
-      
     } //end main level loops
     if(filtered_plays){
     for(var i=0;i<filtered_plays.length;i++){
@@ -323,7 +269,7 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
           .tooltip('update')
           .tooltip('enable')
      },2000)
-    copyClipboard(code)
+    copyClipboard("!tsclear "+code)
   })
   
   $('.loader').hide();
@@ -349,47 +295,11 @@ https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css
           .tooltip('update')
           .tooltip('enable')
      },2000)
-    copyClipboard(code+" like")
+    copyClipboard("!tsclear "+code+" like")
   })
   }
-function copyClipboard(str){
-  const el = document.createElement('textarea');
-  el.value = "!tsclear "+str;
-  document.body.appendChild(el);
-  el.select();
-  document.execCommand('copy');
-  document.body.removeChild(el);
-
-}
 
 
-
-  function save_input(query_name, obj){
-    localStorage.setItem(query_name, ($(obj).val()));
-  }
-
-  function store_input(query_name,obj){
-    if(params.get(query_name)){
-      localStorage.setItem(query_name,params.get(query_name))
-      $(obj).val(params.get(query_name))
-    } else if(localStorage.getItem(query_name)){
-      $(obj).val(localStorage.getItem(query_name))
-    }
-  }
-  
-  function get_input(query_name){
-    return localStorage.getItem(query_name)
-  }
-
-  function setGetParam(key,value) {
-    localStorage.setItem(key,value)
-    if (history.pushState) {
-      var params = new URLSearchParams(window.location.search);
-      params.set(key, value);
-      var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + params.toString();
-      window.history.pushState({path:newUrl},'',newUrl);
-    }
-  }
 
   $(function(){
 
@@ -620,25 +530,20 @@ function getData(){
     datatable.clear().draw();
     datatable2.clear().draw();
     $("#playedTableCont").toggle(params.get("code")!=null)
+    $("#filter_form_cont").toggle( !params.get("code") && !params.get("creator") )
+    var table_title=params.get("creator")?"Showing levels by "+params.get("creator"):""
+    $("#table_title").text(table_title)
 
-    var lastLoaded='';
-    if(raw_data=localStorage.getItem("cachedData")){
-      _data=JSON.parse(raw_data)
-      lastLoaded=_data.lastUpdated
-    }
-    var devid=get_input("devid")
-    var url="https://script.google.com/macros/s/AKfycbwOZQzoqLRYbwSoTYWgJeT1A-YKfDKJf_2jqNBm5qmr_BncNL8/exec?callback=?&lastLoaded="+lastLoaded+("&devid="+(devid?devid:""))
-    $.getJSON(url).done(function(_data){
-    if(_data=="No Updated Needed"){
-      $.notify("No new data was loaded",{
-        className:"success",
-        position:"top right",
-      });
-    } else {
-      raw_data=JSON.stringify(_data)
-      localStorage.setItem("cachedData",raw_data)
-    }
-    refresh()  
+
+    loadTeamshellApi(function(_rawData,dataNoChange){
+      if(dataNoChange){
+        $.notify("No new data was loaded",{
+          className:"success",
+          position:"top right",
+        });
+      }
+      raw_data=_rawData
+      refresh()
     })
 }
 
@@ -664,17 +569,6 @@ function filterTable(){
 
 getData()
   })
-
-//for testing purposes  
-function dev(id){
-  if(id){ 
-    localStorage.setItem("devid",id)
-    console.log('%c This site will now use the sheet with id '+id, 'background: #000; color: #f88501');
-  } else {
-    localStorage.removeItem("devid")
-    console.log('%c This site will now use the main sheet', 'background: #000; color: ##01a09e;');
-  }
-}
 </script>
 </head>
 <body class="dark">
@@ -708,7 +602,7 @@ function dev(id){
     </div>
   </div>
 
-<div>
+<div id="filter_form_cont">
   <div class="form-group row">
     <div class="col-md-6">
     <label for="registeredName">Registered TeamShell Name</label>
@@ -767,7 +661,7 @@ function dev(id){
   
 </div>
 <div class="btn btn-block btn-info"><div id="refresh" title='Get new data from the sheet. Useful if you just submitted a clear'>Refresh Data <i class="fa fa-refresh" aria-hidden="true"></i></div></div>
-
+<h2 id="table_title" class="orange"></h2>
 <table id="table" class="compact row-border stripe hover" style="width:100%">
   <thead><tr>
     <th style="width:10px;">No.</th>

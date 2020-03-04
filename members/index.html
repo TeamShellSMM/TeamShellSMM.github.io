@@ -28,47 +28,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+<script src="../assets/script.js?v=0.0.1"></script>
+
 
 <script>
-function ObjectLength_Modern( object ) {
-    if(!object) return 0
-    return Object.keys(object).length;
-}
-
-function ObjectLength_Legacy( object ) {
-    if(!object) return 0
-    var length = 0;
-    for( var key in object ) {
-        if( object.hasOwnProperty(key) ) {
-            ++length;
-        }
-    }
-    return length;
-}
-
-var ObjectLength = Object.keys ? ObjectLength_Modern : ObjectLength_Legacy;
-
   var data,level_headers,tag_labels,clears,raw_data;
-  var params=new URLSearchParams(window.location.search)
-
-
-  function setDark(val){
-    if(val){
-      localStorage.setItem("dark","1")
-    } else {
-      localStorage.removeItem("dark")
-    }
-  }
-
-  if(params.get("dark")){
-    setDark(params.get("dark")==="1")
-  } 
-  
-  function makeDark(){
-      document.getElementsByTagName("html")[0].className=localStorage.getItem("dark")==="1"?"dark":""
-  }
-
-  makeDark()
 
 function sum(obj){
   if(!obj) return 0
@@ -215,79 +179,12 @@ function within_time(date,clear){
     
     datatable.draw();
     $('[data-toggle="tooltip"],.copy,#refresh,#submitButton').tooltip()
-    $('.copy').click(function(){
-     var code=$(this).parent().text().substring(0,11);
-     var old_title="Copy tsclear code"
-     var new_title="Code copied."
-     
-     $(this).addClass("text-success")
-      $(this).tooltip('hide')
-          .attr('title', new_title)
-          .attr('data-original-title', new_title)
-          .tooltip('update')
-          .tooltip('show')
-      var temp=this
-     
-     setTimeout(function(){
-      $(temp).removeClass("text-success")
-       $(temp).tooltip('hide')
-          .attr('title', old_title)
-          .attr('data-original-title', old_title)
-          .tooltip('update')
-          .tooltip('enable')
-     },2000)
-    copyClipboard(code)
-  })
-
-  }
-function copyClipboard(str){
-  const el = document.createElement('textarea');
-  el.value = "!tsclear "+str;
-  document.body.appendChild(el);
-  el.select();
-  document.execCommand('copy');
-  document.body.removeChild(el);
-
-}
-
-
-  
-
-
-  function store_input(query_name,obj){
-    if(params.get(query_name)){
-      localStorage.setItem(query_name,params.get(query_name))
-      $(obj).val(params.get(query_name))
-    } else if(localStorage.getItem(query_name)){
-      $(obj).val(localStorage.getItem(query_name))
-    } else {
-      localStorage.setItem(query_name,$(obj).val())
-    }
-  }
-  
-  function get_input(query_name){
-    return localStorage.getItem(query_name)
   }
 
-  function setGetParam(key,value) {
-    localStorage.setItem(key,value)
-    if (history.pushState) {
-      var params = new URLSearchParams(window.location.search);
-      params.set(key, value);
-      var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + params.toString();
-      window.history.pushState({path:newUrl},'',newUrl);
-    }
-  }
+
+
 
   $(function(){
-
-    $("#darkmode").change(function(){
-      setDark($(this).prop("checked"))
-      makeDark()
-    }).prop("checked",localStorage.getItem("dark"))
-
-
-
     store_input('membershipStatus','#membershipStatus')
     store_input('timePeriod','#timePeriod')
     store_input('timePeriod2','#timePeriod2')
@@ -351,39 +248,21 @@ function getData(){
     var datatable=$('#table').DataTable()
     datatable.clear().draw();
     
-    var lastLoaded='';
-    if(raw_data=localStorage.getItem("cachedData")){
-      _data=JSON.parse(raw_data)
-      lastLoaded=_data.lastUpdated
-    }
-    var devid=get_input("devid")
-    var url="https://script.google.com/macros/s/AKfycbwOZQzoqLRYbwSoTYWgJeT1A-YKfDKJf_2jqNBm5qmr_BncNL8/exec?callback=?&lastLoaded="+lastLoaded+("&devid="+(devid?devid:""))
-    $.getJSON(url).done(function(_data){
-    if(_data=="No Updated Needed"){
-      $.notify("No new data was loaded",{
-        className:"success",
-        position:"top right",
-      });
-    } else {
-      raw_data=JSON.stringify(_data)
-      localStorage.setItem("cachedData",raw_data)
-    }
-    refresh()  
+    loadTeamshellApi(function(_rawData,dataNoChange){
+      if(dataNoChange){
+        $.notify("No new data was loaded",{
+          className:"success",
+          position:"top right",
+        });
+      }
+      raw_data=_rawData
+      refresh()
     })
 }
 
 getData()
   })
-//for testing purposes  
-function dev(id){
-  if(id){ 
-    localStorage.setItem("devid",id)
-    console.log('%c This site will now use the sheet with id '+id, 'background: #000; color: #f88501');
-  } else {
-    localStorage.removeItem("devid")
-    console.log('%c This site will now use the main sheet', 'background: #000; color: ##01a09e;');
-  }
-}
+
 </script>
 </head>
 <body class="dark">
